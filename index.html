@@ -1,0 +1,492 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>萬年輪班系統｜桃園維護組 班型排序月曆</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Noto Sans TC', '微軟正黑體', sans-serif;
+        }
+
+        body {
+            background: #eef2f7;
+            margin: 0;
+            padding: 20px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+            padding: 20px 20px 28px 20px;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            margin: 0 0 8px 0;
+            color: #1e466e;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        h1 small {
+            font-size: 0.8rem;
+            font-weight: normal;
+            background: #e9f0f5;
+            padding: 5px 14px;
+            border-radius: 40px;
+            color: #2c5a7a;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: #f8fafd;
+            padding: 10px 20px;
+            border-radius: 48px;
+            margin: 12px 0 20px 0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid #e2edf2;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shift-badge {
+            display: inline-block;
+            width: 56px;
+            text-align: center;
+            padding: 4px 0;
+            border-radius: 28px;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .shift-badge.休假 { background: #cddae9; color: #3a4a66; }
+        .shift-badge.早班 { background: #f9d56e; color: #5e3a00; }
+        .shift-badge.小夜 { background: #6fbf8c; color: #1d4d2a; }
+        .shift-badge.大夜 { background: #2c3e66; color: white; }
+
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 0 24px 0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .month-nav button {
+            background: #eef2ff;
+            border: none;
+            font-size: 1.2rem;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1e466e;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .month-nav button:hover {
+            background: #dfe8f3;
+            transform: scale(0.97);
+        }
+
+        .current-month {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: #ffffffdd;
+            padding: 5px 24px;
+            border-radius: 60px;
+            backdrop-filter: blur(2px);
+            color: #1e466e;
+            letter-spacing: 1px;
+        }
+
+        .calendar-wrapper {
+            overflow-x: auto;
+            border-radius: 24px;
+            border: 1px solid #e2edf2;
+            background: white;
+        }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 800px;
+        }
+
+        .calendar-table th {
+            background: #f0f6fe;
+            padding: 14px 6px;
+            font-weight: 700;
+            color: #1f4e79;
+            border-bottom: 2px solid #d0e0ee;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .calendar-table td {
+            border: 1px solid #e6edf4;
+            padding: 8px 6px;
+            vertical-align: top;
+            background-color: #ffffff;
+        }
+
+        .date-number {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #1e466e;
+            display: inline-block;
+            background: #f0f4fa;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-bottom: 8px;
+        }
+
+        .shift-group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .shift-category {
+            border-radius: 16px;
+            background: #fefefe;
+        }
+
+        .category-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4b6e8a;
+            margin-bottom: 4px;
+            padding-left: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .group-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .group-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f5f8fe;
+            padding: 2px 8px;
+            border-radius: 24px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .group-tag .group-name {
+            font-weight: 700;
+            color: #1f5e8e;
+        }
+
+        .group-tag .shift-label {
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        @media (max-width: 750px) {
+            .container {
+                padding: 12px;
+            }
+            .group-tag {
+                font-size: 0.65rem;
+                padding: 2px 6px;
+            }
+            .date-number {
+                font-size: 0.9rem;
+            }
+        }
+
+        footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6f8eae;
+            border-top: 1px solid #dfe8f0;
+            padding-top: 18px;
+        }
+
+        .info-note {
+            background: #eef3fc;
+            border-radius: 24px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #2c6288;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        📅 桃園維護組 萬年輪班月曆
+        <small>ML1 · ML2 · ML3 · ML4 依班型排序</small>
+    </h1>
+    <div class="info-note">
+        ✅ 班型規則：依據2026年4月原始班表第5行校準，每組獨立12天循環。<br>
+        🔄 每個日期內，先列出所有「早班」組別，再依序「小夜」、「大夜」、「休假」。<br>
+        📆 完整顯示1~31號，支援任意月份切換。
+    </div>
+    <div class="legend">
+        <div class="legend-item"><span class="shift-badge 休假">休假</span> 休息日</div>
+        <div class="legend-item"><span class="shift-badge 早班">早班</span> 早班 (M1)</div>
+        <div class="legend-item"><span class="shift-badge 小夜">小夜</span> 小夜班 (N1)</div>
+        <div class="legend-item"><span class="shift-badge 大夜">大夜</span> 大夜班 (N2)</div>
+        <div class="legend-item" style="margin-left:auto;">🔁 排序：早班 → 小夜 → 大夜 → 休假</div>
+    </div>
+
+    <div class="month-nav">
+        <button id="prevMonthBtn">◀ 上個月</button>
+        <div class="current-month" id="currentMonthDisplay">2026年4月</div>
+        <button id="nextMonthBtn">下個月 ▶</button>
+    </div>
+
+    <div class="calendar-wrapper">
+        <table class="calendar-table" id="calendarTable">
+            <thead>
+                <tr>
+                    <th>週日</th><th>週一</th><th>週二</th><th>週三</th><th>週四</th><th>週五</th><th>週六</th>
+                </tr>
+            </thead>
+            <tbody id="calendarBody"></tbody>
+        </table>
+    </div>
+    <footer>
+        ✅ 基準日期：2026-04-01，各組班型取自原始Excel第5行。<br>
+        🧪 範例驗證：2026/04/14 → 早班:ML1, 小夜:ML3, 大夜:ML2, 休假:ML4，完全符合您的要求。
+    </footer>
+</div>
+
+<script>
+    // ======================= 核心數據：各組12天循環班型 (取自2026年4月前12天實際班表第5行) =======================
+    // 映射依據原始Excel ML1~ML4 工作表第5行 2026/04/01 ~ 2026/04/12 實際班型
+    // M1 → "早班", N1 → "小夜", N2 → "大夜", 其餘(R/Z/GBL/T3/FL/AL等) → "休假"
+    const CYCLE_PATTERNS = {
+        "ML1": ["早班", "早班", "早班", "休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假"],
+        "ML2": ["休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假", "早班", "早班", "早班"],
+        "ML3": ["小夜", "小夜", "休假", "早班", "早班", "早班", "休假", "大夜", "大夜", "大夜", "休假", "小夜"],
+        "ML4": ["大夜", "休假", "小夜", "小夜", "小夜", "休假", "早班", "早班", "早班", "休假", "大夜", "大夜"]
+    };
+    const CYCLE_LEN = 12;
+    const GROUPS = ["ML1", "ML2", "ML3", "ML4"];
+
+    // 基準日期：2026年4月1日 (用於計算天數差)
+    const BASE_DATE = new Date(2026, 3, 1);  // month 3 = 四月
+
+    /**
+     * 計算目標日期與基準日期的天數差 (只考慮日期)
+     * @param {Date} targetDate 
+     * @returns {number}
+     */
+    function daysFromBase(targetDate) {
+        const base = new Date(BASE_DATE.getFullYear(), BASE_DATE.getMonth(), BASE_DATE.getDate());
+        const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+        const diffTime = target - base;
+        return Math.round(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    /**
+     * 取得指定組別在指定日期的班型
+     * @param {string} groupName 
+     * @param {Date} date 
+     * @returns {string} "早班" / "小夜" / "大夜" / "休假"
+     */
+    function getShiftByDate(groupName, date) {
+        const pattern = CYCLE_PATTERNS[groupName];
+        if (!pattern) return "錯誤";
+        const diff = daysFromBase(date);
+        let idx = diff % CYCLE_LEN;
+        if (idx < 0) idx += CYCLE_LEN;
+        return pattern[idx];
+    }
+
+    // 班型順序定義 (用於排序)
+    const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
+
+    // ======================= 月曆渲染邏輯 (按班型排序) =======================
+    function getMonthDays(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayWeekIndex(year, month) {
+        return new Date(year, month, 1).getDay();
+    }
+
+    let currentYear = 2026;
+    let currentMonth = 3;   // 0-index, 3 代表四月
+
+    function renderCalendar(year, month) {
+        const firstDayWeek = getFirstDayWeekIndex(year, month);
+        const daysInMonth = getMonthDays(year, month);
+        const tbody = document.getElementById("calendarBody");
+        tbody.innerHTML = "";
+
+        let dateCounter = 1;
+        let currentRow = null;
+        const totalCells = 42; // 6 rows * 7 days
+
+        for (let i = 0; i < totalCells; i++) {
+            const weekCol = i % 7;
+            if (weekCol === 0) {
+                currentRow = document.createElement("tr");
+                tbody.appendChild(currentRow);
+            }
+
+            // 空白格子
+            if (i < firstDayWeek || dateCounter > daysInMonth) {
+                const emptyCell = document.createElement("td");
+                emptyCell.style.backgroundColor = "#fafcff";
+                emptyCell.style.color = "#aaa";
+                emptyCell.style.verticalAlign = "top";
+                emptyCell.style.padding = "8px 6px";
+                emptyCell.innerHTML = "&nbsp;";
+                currentRow.appendChild(emptyCell);
+                continue;
+            }
+
+            // 正常日期
+            const currentDate = new Date(year, month, dateCounter);
+            const weekDay = currentDate.getDay();
+            const isWeekend = (weekDay === 0 || weekDay === 6);
+
+            const cell = document.createElement("td");
+            cell.style.verticalAlign = "top";
+            cell.style.padding = "8px 8px";
+            if (isWeekend) {
+                cell.style.backgroundColor = "#fffaf0";
+            } else {
+                cell.style.backgroundColor = "#ffffff";
+            }
+
+            // 日期標頭
+            const weekStr = ["日", "一", "二", "三", "四", "五", "六"][weekDay];
+            const dateHeader = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="date-number">${dateCounter}</span>
+                    <span style="font-size:0.7rem; color:#7a8eaa;">${weekStr}</span>
+                </div>
+            `;
+
+            // 收集當日各組班型
+            const groupShifts = {};
+            for (let g of GROUPS) {
+                const shift = getShiftByDate(g, currentDate);
+                if (!groupShifts[shift]) groupShifts[shift] = [];
+                groupShifts[shift].push(g);
+            }
+
+            // 依照班型順序輸出
+            let groupsHtml = '<div class="shift-group-list">';
+            for (let shiftType of SHIFT_ORDER) {
+                const groupsWithShift = groupShifts[shiftType];
+                if (!groupsWithShift || groupsWithShift.length === 0) continue;
+                // 同一班型內的組別依 ML1,ML2,ML3,ML4 自然排序 (保持組別順序)
+                groupsWithShift.sort((a,b) => GROUPS.indexOf(a) - GROUPS.indexOf(b));
+                const shiftClass = (shiftType === "早班" ? "早班" : (shiftType === "小夜" ? "小夜" : (shiftType === "大夜" ? "大夜" : "休假")));
+                groupsHtml += `
+                    <div class="shift-category">
+                        <div class="category-title">${shiftType}</div>
+                        <div class="group-tags">
+                            ${groupsWithShift.map(g => `
+                                <span class="group-tag">
+                                    <span class="group-name">${g}</span>
+                                    <span class="shift-label shift-badge ${shiftClass}">${shiftType}</span>
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            groupsHtml += '</div>';
+
+            cell.innerHTML = dateHeader + groupsHtml;
+            currentRow.appendChild(cell);
+            dateCounter++;
+        }
+
+        // 更新月份標題
+        const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+        document.getElementById("currentMonthDisplay").innerHTML = `${year}年 ${monthNames[month]}`;
+    }
+
+    function goPrevMonth() {
+        if (currentMonth === 0) {
+            currentMonth = 11;
+            currentYear--;
+        } else {
+            currentMonth--;
+        }
+        renderCalendar(currentYear, currentMonth);
+    }
+
+    function goNextMonth() {
+        if (currentMonth === 11) {
+            currentMonth = 0;
+            currentYear++;
+        } else {
+            currentMonth++;
+        }
+        renderCalendar(currentYear, currentMonth);
+    }
+
+    // 綁定事件
+    document.getElementById("prevMonthBtn").addEventListener("click", goPrevMonth);
+    document.getElementById("nextMonthBtn").addEventListener("click", goNextMonth);
+
+    // 初始渲染 (2026年4月)
+    renderCalendar(2026, 3);
+
+    // 控制台驗證 (14~16日範例)
+    (function validate() {
+        console.log("=== 班型排序驗證 (2026/04/14~16) ===");
+        const testDates = [14, 15, 16];
+        const expected = {
+            14: { ML1:"早班", ML2:"大夜", ML3:"小夜", ML4:"休假" },
+            15: { ML1:"早班", ML2:"大夜", ML3:"休假", ML4:"小夜" },
+            16: { ML1:"休假", ML2:"大夜", ML3:"早班", ML4:"小夜" }
+        };
+        for (let d of testDates) {
+            const date = new Date(2026, 3, d);
+            const shifts = {};
+            for (let g of GROUPS) shifts[g] = getShiftByDate(g, date);
+            console.log(`04/${d}:`, shifts);
+            const match = (shifts.ML1 === expected[d].ML1 && shifts.ML2 === expected[d].ML2 && shifts.ML3 === expected[d].ML3 && shifts.ML4 === expected[d].ML4);
+            if (!match) console.warn(`❌ 04/${d} 資料不一致`);
+            else console.log(`✅ 04/${d} 正確`);
+        }
+        console.log("📌 排序邏輯：早班 → 小夜 → 大夜 → 休假，每個類別下列出對應組別。");
+    })();
+</script>
+</body>
+</html>
