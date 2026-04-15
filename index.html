@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>萬年輪班系統｜航線修護本部 班表月曆</title>
+    <title>萬年輪班系統｜航線修護本部 班表月曆 (含台灣節日)</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
@@ -229,6 +229,12 @@
             border-bottom: 1px solid #eef2f8;
             padding-bottom: 5px;
         }
+        .date-info {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
         .date-number {
             font-weight: 800;
             font-size: 1rem;
@@ -236,6 +242,15 @@
             background: #f0f6fe;
             padding: 2px 10px;
             border-radius: 40px;
+        }
+        .holiday-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #c0392b;
+            background: #ffe6e2;
+            padding: 2px 8px;
+            border-radius: 30px;
+            white-space: nowrap;
         }
         .shift-group-list {
             display: flex;
@@ -311,6 +326,10 @@
         .ml-number.ml2 { color: #f1c40f; text-shadow: 0 0 1px rgba(0,0,0,0.2); }
         .ml-number.ml3 { color: #3498db; }
         .ml-number.ml4 { color: #2ecc71; }
+        .shift-separator {
+            border-top: 1px dashed #e34234;
+            margin: 6px 0 4px 0;
+        }
         footer {
             margin-top: 20px;
             text-align: center;
@@ -325,6 +344,7 @@
             .group-tag .ml-number { font-size: 1rem; }
             .category-title { font-size: 0.7rem; padding: 4px 8px; }
             .date-number { font-size: 0.85rem; }
+            .holiday-name { font-size: 0.6rem; white-space: normal; }
             .capture-title { font-size: 1.1rem; }
             .calendar-table td { padding: 6px 4px; }
             .placeholder-time { min-width: 65px; }
@@ -373,7 +393,7 @@
 </div>
 
 <script>
-    // 班型週期資料 (12天)
+    // ======================= 班型週期資料 =======================
     const CYCLE_PATTERNS = {
         "ML1": ["早班", "早班", "早班", "休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假"],
         "ML2": ["休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假", "早班", "早班", "早班"],
@@ -384,9 +404,32 @@
     const GROUPS = ["ML1", "ML2", "ML3", "ML4"];
     const BASE_DATE = new Date(2026, 3, 1);
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
-    // 更新班型時間
     const SHIFT_TIMES = { "早班": "06:00-14:00", "小夜": "14:30-22:30", "大夜": "22:30-06:30", "休假": "" };
 
+    // ======================= 台灣節日資料 (公曆固定日期 + 清明節動態) =======================
+    function getHolidayName(month, day, year) {
+        // month 0-11
+        const key = `${month+1}/${day}`;
+        const fixedHolidays = {
+            "1/1": "元旦",
+            "2/28": "和平紀念日",
+            "4/4": "兒童節",
+            "5/1": "勞動節",
+            "9/28": "教師節",
+            "10/10": "國慶日",
+            "10/25": "臺灣光復節",
+            "12/25": "行憲紀念日"
+        };
+        if (fixedHolidays[key]) return fixedHolidays[key];
+        // 清明節：4月4日或4月5日 (年份判斷，通常4月4日或5日)
+        if (month+1 === 4 && (day === 4 || day === 5)) {
+            // 簡單規則：2000年以後，清明節多在4月4日，但可根據年份微調，這裡統一顯示「清明節」
+            return "清明節";
+        }
+        return null;
+    }
+
+    // ======================= 日期計算函數 =======================
     function daysFromBase(targetDate) {
         const base = new Date(BASE_DATE.getFullYear(), BASE_DATE.getMonth(), BASE_DATE.getDate());
         const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
@@ -497,7 +540,17 @@
             }
             
             const weekStr = headers[weekCol];
-            const dateHeader = `<div class="date-header"><span class="date-number">${dateCounter}</span><span style="font-size:0.7rem; color:#7f9cbb;">${weekStr}</span></div>`;
+            // 取得節日名稱
+            const holiday = getHolidayName(month, dateCounter, year);
+            const dateHeader = `
+                <div class="date-header">
+                    <div class="date-info">
+                        <span class="date-number">${dateCounter}號</span>
+                        ${holiday ? `<span class="holiday-name">${holiday}</span>` : ''}
+                    </div>
+                    <span style="font-size:0.7rem; color:#7f9cbb;">${weekStr}</span>
+                </div>
+            `;
             
             const groupShifts = {};
             for (let g of GROUPS) {
@@ -507,6 +560,7 @@
             }
             
             let groupsHtml = '<div class="shift-group-list">';
+            let hasPreviousShift = false;
             for (let shiftType of SHIFT_ORDER) {
                 const groupsWithShift = groupShifts[shiftType];
                 if (!groupsWithShift || groupsWithShift.length === 0) continue;
@@ -523,9 +577,12 @@
                 } else if (shiftType === '大夜') {
                     titleClass = '大夜';
                     timeHtml = `<span class="shift-time">${timeLabel}</span>`;
-                } else { // 休假
+                } else {
                     titleClass = '休假';
                     timeHtml = `<span class="placeholder-time">${timeLabel}</span>`;
+                }
+                if (shiftType === '休假' && hasPreviousShift) {
+                    groupsHtml += `<div class="shift-separator"></div>`;
                 }
                 groupsHtml += `
                     <div class="shift-category">
@@ -538,6 +595,7 @@
                         </div>
                     </div>
                 `;
+                hasPreviousShift = true;
             }
             groupsHtml += '</div>';
             cell.innerHTML = dateHeader + groupsHtml;
