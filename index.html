@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>萬年輪班系統｜桃園維護組 班表月曆</title>
+    <title>萬年輪班系統｜航線修護本部 班表月曆</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
@@ -204,24 +204,20 @@
             text-align: center;
             font-size: 0.85rem;
         }
-        /* 所有日期儲存格預設黑色粗邊框 */
         .calendar-table td {
             border: 2px solid #333333;
             padding: 10px 8px;
             vertical-align: top;
             background-color: #ffffff;
         }
-        /* 今天的紅色框 */
         .calendar-table td.today-cell {
             border: 3px solid #e34234 !important;
             background-color: #fff8f5;
         }
-        /* 選定日期的紅色框（與今天相同，但若同時為今天則以今天樣式為主） */
         .calendar-table td.selected-cell {
             border: 3px solid #e34234 !important;
             background-color: #fffaf0;
         }
-        /* 今天且同時為選定日期時，保留紅色框 */
         .calendar-table td.today-cell.selected-cell {
             border: 3px solid #e34234 !important;
         }
@@ -270,6 +266,15 @@
             font-size: 0.7rem;
             font-weight: normal;
             margin-left: 8px;
+        }
+        /* 休假的佔位符，維持與時間文字相同寬度 */
+        .placeholder-time {
+            visibility: hidden;
+            font-size: 0.7rem;
+            font-weight: normal;
+            margin-left: 8px;
+            min-width: 85px;  /* 與實際時間文字寬度相當 */
+            display: inline-block;
         }
         .category-title.大夜 .shift-time {
             color: white;
@@ -326,13 +331,14 @@
             .date-number { font-size: 0.85rem; }
             .capture-title { font-size: 1.1rem; }
             .calendar-table td { padding: 6px 4px; }
+            .placeholder-time { min-width: 65px; }
         }
     </style>
 </head>
 <body>
 <div class="container" id="calendarContainer">
     <div class="header-area">
-        <h1>📅 桃園維護組 萬年輪班月曆 <small>ML1 · ML2 · ML3 · ML4</small></h1>
+        <h1 id="mainTitle">航線修護本部 萬年輪班月曆</h1>
         <button class="btn-download" id="downloadBtn">📸 下載本月圖片</button>
     </div>
     <div class="controls">
@@ -361,7 +367,7 @@
     </div>
 
     <div class="calendar-wrapper" id="captureArea">
-        <div id="captureTitle" class="capture-title">2026年4月 桃園維護組輪班表</div>
+        <div id="captureTitle" class="capture-title">2026年4月 航線修護本部輪班表</div>
         <table class="calendar-table" id="calendarTable">
             <thead id="tableHeader"></thead>
             <tbody id="calendarBody"></tbody>
@@ -371,6 +377,7 @@
 </div>
 
 <script>
+    // 班型週期資料 (12天)
     const CYCLE_PATTERNS = {
         "ML1": ["早班", "早班", "早班", "休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假"],
         "ML2": ["休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假", "早班", "早班", "早班"],
@@ -418,7 +425,25 @@
         const titleDiv = document.getElementById('captureTitle');
         if (titleDiv) {
             const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
-            titleDiv.innerText = `${year}年 ${monthNames[month]} 桃園維護組輪班表`;
+            titleDiv.innerText = `${year}年 ${monthNames[month]} 航線修護本部輪班表`;
+        }
+    }
+
+    // 格式化今天的日期為 DD/MMM/YYYY (英文月份縮寫)
+    function formatTodayDate() {
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const d = today.getDate();
+        const m = months[today.getMonth()];
+        const y = today.getFullYear();
+        return `${d}/${m}/${y}`;
+    }
+
+    // 更新主標題（包含今天日期）
+    function updateMainTitle() {
+        const titleEl = document.getElementById('mainTitle');
+        if (titleEl) {
+            const dateStr = formatTodayDate();
+            titleEl.innerHTML = `${dateStr} 航線修護本部 萬年輪班月曆 <small>ML1 · ML2 · ML3 · ML4</small>`;
         }
     }
 
@@ -469,7 +494,6 @@
             const isToday = (currentDate.getTime() === today.getTime());
             const isSelected = (highlightSelectedDate && currentDate.getTime() === highlightSelectedDate.getTime());
             
-            // 使用 class 控制邊框樣式
             if (isToday) {
                 cell.classList.add('today-cell');
             }
@@ -493,12 +517,22 @@
                 if (!groupsWithShift || groupsWithShift.length === 0) continue;
                 groupsWithShift.sort((a,b) => GROUPS.indexOf(a) - GROUPS.indexOf(b));
                 const timeLabel = SHIFT_TIMES[shiftType];
-                const timeHtml = (shiftType !== "休假" && timeLabel) ? `<span class="shift-time">${timeLabel}</span>` : '';
+                let timeHtml = '';
                 let titleClass = '';
-                if (shiftType === '早班') titleClass = '早班';
-                else if (shiftType === '小夜') titleClass = '小夜';
-                else if (shiftType === '大夜') titleClass = '大夜';
-                else titleClass = '休假';
+                if (shiftType === '早班') {
+                    titleClass = '早班';
+                    timeHtml = `<span class="shift-time">${timeLabel}</span>`;
+                } else if (shiftType === '小夜') {
+                    titleClass = '小夜';
+                    timeHtml = `<span class="shift-time">${timeLabel}</span>`;
+                } else if (shiftType === '大夜') {
+                    titleClass = '大夜';
+                    timeHtml = `<span class="shift-time">${timeLabel}</span>`;
+                } else { // 休假
+                    titleClass = '休假';
+                    // 加入隱形佔位符，使左右平衡，視覺寬度與其他班型一致
+                    timeHtml = `<span class="placeholder-time">${timeLabel}</span>`;
+                }
                 groupsHtml += `
                     <div class="shift-category">
                         <div class="category-title ${titleClass}">
@@ -665,6 +699,7 @@
         renderCalendar(currentYear, currentMonth, selectedDate, weekStart);
         initControls();
         document.getElementById('downloadBtn').addEventListener('click', downloadCalendarImage);
+        updateMainTitle();
     }
     init();
 </script>
