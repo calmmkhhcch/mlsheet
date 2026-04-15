@@ -4,300 +4,321 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>萬年輪班系統｜桃園維護組 班表月曆</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
             font-family: system-ui, 'Segoe UI', 'Noto Sans TC', '微軟正黑體', sans-serif;
         }
-
         body {
-            background: #eef2f7;
+            background: linear-gradient(145deg, #e2eaf1 0%, #d4e0ea 100%);
             margin: 0;
-            padding: 12px 10px;
+            padding: 20px 16px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
-
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             width: 100%;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            padding: 12px 12px 20px 12px;
-            transition: all 0.2s;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+            padding: 20px 20px 24px 20px;
         }
-
-        h1 {
-            font-size: 1.4rem;
-            margin: 0 0 4px 0;
-            color: #1e466e;
+        .header-area {
             display: flex;
-            align-items: baseline;
-            flex-wrap: wrap;
             justify-content: space-between;
-            gap: 8px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            gap: 12px;
         }
-
+        h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            color: #1e466e;
+        }
         h1 small {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: normal;
-            background: #e9f0f5;
-            padding: 3px 10px;
-            border-radius: 30px;
+            background: #eef2f7;
+            padding: 4px 12px;
+            border-radius: 40px;
             color: #2c5a7a;
+            margin-left: 8px;
         }
-
+        .btn-download {
+            background: #2c6e2c;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: 0.2s;
+        }
+        .btn-download:hover {
+            background: #1e551e;
+            transform: scale(0.97);
+        }
         .controls {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
             margin: 8px 0 12px 0;
         }
-
         .date-picker-area {
             display: flex;
-            gap: 8px;
-            background: #f8fafd;
-            padding: 6px 12px;
-            border-radius: 48px;
+            gap: 10px;
+            background: #f0f5fa;
+            padding: 6px 16px;
+            border-radius: 60px;
             align-items: center;
             flex-wrap: wrap;
         }
-
-        .date-picker-area select {
+        .date-picker-area select, .goto-btn {
             background: white;
             border: 1px solid #cbdde9;
-            border-radius: 32px;
-            padding: 6px 10px;
-            font-size: 0.8rem;
+            border-radius: 36px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #1e466e;
             cursor: pointer;
         }
-
         .goto-btn {
             background: #1e466e;
             color: white;
             border: none;
-            border-radius: 32px;
-            padding: 6px 14px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
         }
-
-        .goto-btn:hover {
-            background: #0f3557;
-        }
-
-        .month-nav {
+        .week-start-option {
+            background: #f0f5fa;
+            padding: 6px 16px;
+            border-radius: 60px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            align-items: center;
+            font-size: 0.8rem;
         }
-
-        .month-nav button {
-            background: #eef2ff;
-            border: none;
-            font-size: 1rem;
-            padding: 6px 14px;
-            border-radius: 32px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #1e466e;
-        }
-
-        .month-nav button:hover {
-            background: #dfe8f3;
-        }
-
-        .current-month {
-            font-size: 1.2rem;
-            font-weight: 700;
-            background: #eef2ff;
-            padding: 4px 16px;
-            border-radius: 32px;
-            color: #1e466e;
-        }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            background: #f8fafd;
-            padding: 6px 12px;
-            border-radius: 40px;
-            margin: 8px 0 12px 0;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-
-        .legend-item {
+        .week-start-option label {
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
         }
-
+        .month-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .month-nav button {
+            background: #ffffff;
+            border: 1px solid #cbdde9;
+            font-size: 1rem;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #1e466e;
+        }
+        .month-nav button:hover {
+            background: #eef2ff;
+        }
+        .current-month {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: #ffffffdd;
+            padding: 6px 24px;
+            border-radius: 48px;
+            backdrop-filter: blur(4px);
+            color: #1e466e;
+            border: 1px solid #d4e2f0;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: #f8fafd;
+            padding: 10px 20px;
+            border-radius: 60px;
+            margin: 10px 0 20px 0;
+            font-size: 0.75rem;
+            border: 1px solid #e2edf2;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
         .shift-badge {
             display: inline-block;
-            width: 48px;
+            width: 56px;
             text-align: center;
-            padding: 2px 0;
-            border-radius: 24px;
+            padding: 4px 0;
+            border-radius: 28px;
             font-weight: bold;
             font-size: 0.7rem;
         }
-
         .shift-badge.休假 { background: #cddae9; color: #3a4a66; }
         .shift-badge.早班 { background: #f9d56e; color: #5e3a00; }
         .shift-badge.小夜 { background: #6fbf8c; color: #1d4d2a; }
         .shift-badge.大夜 { background: #2c3e66; color: white; }
-
         .calendar-wrapper {
             overflow-x: auto;
-            border-radius: 20px;
-            border: 1px solid #e2edf2;
-            background: white;
+            border-radius: 28px;
+            border: 1px solid #e9f0f5;
+            background: #ffffff;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
         }
-
+        /* 截圖區域內部的標題區 */
+        .capture-title {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+            padding: 12px 0 8px 0;
+            margin: 0;
+            color: #1e466e;
+            background: white;
+            border-bottom: 2px solid #d4e2f0;
+        }
         .calendar-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.7rem;
-            min-width: 700px;
+            font-size: 0.75rem;
+            min-width: 800px;
         }
-
         .calendar-table th {
-            background: #f0f6fe;
-            padding: 8px 4px;
+            background: #eef3fc;
+            padding: 14px 6px;
             font-weight: 700;
             color: #1f4e79;
-            border-bottom: 1px solid #d0e0ee;
+            border-bottom: 2px solid #d4e2f0;
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
         }
-
         .calendar-table td {
-            border: 1px solid #e6edf4;
-            padding: 6px 4px;
+            border: 1px solid #eef2f8;
+            padding: 10px 8px;
             vertical-align: top;
             background-color: #ffffff;
         }
-
         .date-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            border-bottom: 1px dashed #e2edf2;
-            padding-bottom: 4px;
+            align-items: baseline;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eef2f8;
+            padding-bottom: 5px;
         }
         .date-number {
             font-weight: 800;
-            font-size: 0.85rem;
+            font-size: 1rem;
             color: #1e466e;
-            background: #f0f4fa;
-            padding: 0px 6px;
-            border-radius: 20px;
+            background: #f0f6fe;
+            padding: 2px 10px;
+            border-radius: 40px;
         }
         .today-highlight {
-            border: 2px solid #e34234;
-            border-radius: 8px;
-            background-color: #fff5f0;
+            border: 2px solid #e34234 !important;
+            border-radius: 16px;
+            background-color: #fff8f5;
         }
         .selected-highlight {
-            border: 2px solid #ff8c00;
-            border-radius: 8px;
-            background-color: #fff9e8;
+            border: 2px solid #ff9f2e !important;
+            border-radius: 16px;
+            background-color: #fffaf0;
         }
-
         .shift-group-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
         .shift-category {
-            background: #fefefe;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2px 0;
         }
         .category-title {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #4b6e8a;
-            margin-bottom: 2px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #2c6288;
+            margin-bottom: 4px;
             padding-left: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .shift-time {
+            font-size: 0.7rem;
+            font-weight: normal;
+            color: #5f7f9e;
+            background: #ecf3f9;
+            padding: 2px 8px;
+            border-radius: 30px;
         }
         .group-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            align-items: center;
+            gap: 6px;
+            margin-left: 2px;
         }
         .group-tag {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: #f5f8fe;
-            padding: 2px 6px;
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 500;
+            gap: 8px;
+            background: #f8fafd;
+            padding: 4px 10px;
+            border-radius: 48px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
         .group-tag .group-name {
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 1rem;
             color: #1f5e8e;
         }
         .group-tag .shift-label {
-            padding: 2px 5px;
-            border-radius: 16px;
-            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
-
         footer {
-            margin-top: 16px;
+            margin-top: 20px;
             text-align: center;
-            font-size: 0.65rem;
-            color: #6f8eae;
-            border-top: 1px solid #dfe8f0;
-            padding-top: 12px;
+            font-size: 0.7rem;
+            color: #7a9cbb;
+            border-top: 1px solid #e2edf2;
+            padding-top: 16px;
         }
-
         @media (max-width: 750px) {
-            .container {
-                padding: 10px;
-            }
-            .group-tag {
-                font-size: 0.6rem;
-                padding: 1px 4px;
-            }
-            .category-title {
-                font-size: 0.6rem;
-            }
-            .date-number {
-                font-size: 0.75rem;
-            }
-            .legend-item {
-                font-size: 0.65rem;
-            }
-            .shift-badge {
-                width: 42px;
-                font-size: 0.65rem;
-            }
+            .container { padding: 12px; }
+            .group-tag { padding: 3px 8px; gap: 5px; }
+            .group-tag .group-name { font-size: 0.85rem; }
+            .category-title { font-size: 0.7rem; }
+            .shift-time { font-size: 0.6rem; }
+            .date-number { font-size: 0.85rem; }
+            .current-month { font-size: 1rem; }
+            .capture-title { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>
-        📅 桃園維護組 萬年輪班月曆
-        <small>ML1 · ML2 · ML3 · ML4 (年份下拉選擇)</small>
-    </h1>
-    
+<div class="container" id="calendarContainer">
+    <div class="header-area">
+        <h1>📅 桃園維護組 萬年輪班月曆 <small>ML1 · ML2 · ML3 · ML4</small></h1>
+        <button class="btn-download" id="downloadBtn">📸 下載本月圖片</button>
+    </div>
     <div class="controls">
         <div class="date-picker-area">
             <select id="yearSelect"></select>
@@ -305,36 +326,37 @@
             <select id="daySelect"></select>
             <button class="goto-btn" id="gotoDateBtn">📅 跳轉</button>
         </div>
+        <div class="week-start-option">
+            <label><input type="radio" name="weekStart" value="0" checked> 週日開始</label>
+            <label><input type="radio" name="weekStart" value="1"> 週一開始</label>
+        </div>
         <div class="month-nav">
             <button id="prevMonthBtn">◀ 上月</button>
             <div class="current-month" id="currentMonthDisplay">2026年4月</div>
             <button id="nextMonthBtn">下月 ▶</button>
         </div>
     </div>
-
     <div class="legend">
         <div class="legend-item"><span class="shift-badge 休假">休假</span> 休息日</div>
-        <div class="legend-item"><span class="shift-badge 早班">早班</span> 早班 (M1)</div>
-        <div class="legend-item"><span class="shift-badge 小夜">小夜</span> 小夜班 (N1)</div>
-        <div class="legend-item"><span class="shift-badge 大夜">大夜</span> 大夜班 (N2)</div>
+        <div class="legend-item"><span class="shift-badge 早班">早班</span> 05:30-13:30</div>
+        <div class="legend-item"><span class="shift-badge 小夜">小夜</span> 13:30-21:30</div>
+        <div class="legend-item"><span class="shift-badge 大夜">大夜</span> 21:30-05:30</div>
         <div class="legend-item" style="margin-left:auto;">🔁 排序：早班 → 小夜 → 大夜 → 休假</div>
     </div>
 
-    <div class="calendar-wrapper">
+    <!-- 截圖目標區塊，內含月份標題 + 月曆表格 -->
+    <div class="calendar-wrapper" id="captureArea">
+        <div id="captureTitle" class="capture-title">2026年4月 桃園維護組輪班表</div>
         <table class="calendar-table" id="calendarTable">
-            <thead>
-                <tr><th>週日</th><th>週一</th><th>週二</th><th>週三</th><th>週四</th><th>週五</th><th>週六</th></tr>
-            </thead>
+            <thead id="tableHeader"></thead>
             <tbody id="calendarBody"></tbody>
         </table>
     </div>
-    <footer>
-        ✅ 基準日期：2026-04-01 (取自原始班表) · 年份範圍 1950~2150 (可透過上下月無限延伸) · 紅框為今日日期 · 橘框為選定日期
-    </footer>
+    <footer>✅ 基準日期：2026-04-01 · 年份範圍 1950~2150 · 紅框為今日 · 橘框為選定日期<br>📌 可切換「週日/週一」為每週第一天，下載圖片會自動帶入年月標題。</footer>
 </div>
 
 <script>
-    // ======================= 核心數據：各組12天循環班型 (取自2026年4月前12天實際班表第5行) =======================
+    // 班型週期資料 (12天)
     const CYCLE_PATTERNS = {
         "ML1": ["早班", "早班", "早班", "休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假"],
         "ML2": ["休假", "大夜", "大夜", "大夜", "休假", "小夜", "小夜", "小夜", "休假", "早班", "早班", "早班"],
@@ -343,26 +365,15 @@
     };
     const CYCLE_LEN = 12;
     const GROUPS = ["ML1", "ML2", "ML3", "ML4"];
-
-    // 基準日期：2026年4月1日 (用於計算天數差)
-    const BASE_DATE = new Date(2026, 3, 1);  // month 3 = 四月
-
-    // 班型順序
+    const BASE_DATE = new Date(2026, 3, 1);
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
+    const SHIFT_TIMES = { "早班": "05:30-13:30", "小夜": "13:30-21:30", "大夜": "21:30-05:30", "休假": "" };
 
-    /**
-     * 計算目標日期與基準日期的天數差 (只考慮日期，支援任何年份)
-     */
     function daysFromBase(targetDate) {
         const base = new Date(BASE_DATE.getFullYear(), BASE_DATE.getMonth(), BASE_DATE.getDate());
         const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-        const diffTime = target - base;
-        return Math.round(diffTime / (1000 * 60 * 60 * 24));
+        return Math.round((target - base) / (1000 * 60 * 60 * 24));
     }
-
-    /**
-     * 取得指定組別在指定日期的班型
-     */
     function getShiftByDate(groupName, date) {
         const pattern = CYCLE_PATTERNS[groupName];
         const diff = daysFromBase(date);
@@ -371,19 +382,135 @@
         return pattern[idx];
     }
 
-    // 全域變數
-    let currentYear = 2026;
-    let currentMonth = 3;      // 0-index, 3=四月
-    let selectedDate = null;   // 儲存使用者選定的日期 (Date物件)
-    let today = new Date();     // 真實今天
+    let currentYear = 2026, currentMonth = 3;
+    let selectedDate = null;
+    let today = new Date();
     today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    let weekStart = 0;
 
-    // 動態產生年份下拉選單 (範圍 1950 ~ 2150，足夠一般使用，且可透過上下月按鈕任意移動)
+    function getMonthDays(year, month) { return new Date(year, month + 1, 0).getDate(); }
+    function getFirstDayOffset(year, month, startWeek) {
+        const firstDayWeek = new Date(year, month, 1).getDay();
+        if (startWeek === 0) return firstDayWeek;
+        return (firstDayWeek === 0) ? 6 : firstDayWeek - 1;
+    }
+    function getWeekdayHeaders(startWeek) {
+        const days = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+        if (startWeek === 0) return days;
+        return [...days.slice(1), days[0]];
+    }
+
+    // 更新截圖標題
+    function updateCaptureTitle(year, month) {
+        const titleDiv = document.getElementById('captureTitle');
+        if (titleDiv) {
+            const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+            titleDiv.innerText = `${year}年 ${monthNames[month]} 桃園維護組輪班表`;
+        }
+    }
+
+    function renderCalendar(year, month, highlightSelectedDate = null, startWeek = weekStart) {
+        const offset = getFirstDayOffset(year, month, startWeek);
+        const daysInMonth = getMonthDays(year, month);
+        const tbody = document.getElementById("calendarBody");
+        const thead = document.getElementById("tableHeader");
+        tbody.innerHTML = "";
+        const headers = getWeekdayHeaders(startWeek);
+        thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+        
+        let dateCounter = 1;
+        let currentRow = null;
+        const totalCells = 42;
+        for (let i = 0; i < totalCells; i++) {
+            const weekCol = i % 7;
+            if (weekCol === 0) {
+                currentRow = document.createElement("tr");
+                tbody.appendChild(currentRow);
+            }
+            if (i < offset || dateCounter > daysInMonth) {
+                const emptyCell = document.createElement("td");
+                emptyCell.style.backgroundColor = "#fafcff";
+                emptyCell.style.padding = "10px 6px";
+                emptyCell.innerHTML = "&nbsp;";
+                currentRow.appendChild(emptyCell);
+                continue;
+            }
+            const currentDate = new Date(year, month, dateCounter);
+            const weekDay = currentDate.getDay();
+            const isWeekend = (startWeek === 0 && (weekDay === 0 || weekDay === 6)) || (startWeek === 1 && (weekDay === 6 || weekDay === 0));
+            const cell = document.createElement("td");
+            cell.style.verticalAlign = "top";
+            cell.style.padding = "10px 8px";
+            cell.style.backgroundColor = isWeekend ? "#fffcf5" : "#ffffff";
+            const isToday = (currentDate.getTime() === today.getTime());
+            const isSelected = (highlightSelectedDate && currentDate.getTime() === highlightSelectedDate.getTime());
+            if (isToday) {
+                cell.classList.add('today-highlight');
+                cell.style.border = "2px solid #e34234";
+            } else if (isSelected) {
+                cell.classList.add('selected-highlight');
+                cell.style.border = "2px solid #ff9f2e";
+            } else {
+                cell.style.border = "1px solid #eef2f8";
+            }
+            const weekStr = headers[weekCol];
+            const dateHeader = `<div class="date-header"><span class="date-number">${dateCounter}</span><span style="font-size:0.7rem; color:#7f9cbb;">${weekStr}</span></div>`;
+            const groupShifts = {};
+            for (let g of GROUPS) {
+                const shift = getShiftByDate(g, currentDate);
+                if (!groupShifts[shift]) groupShifts[shift] = [];
+                groupShifts[shift].push(g);
+            }
+            let groupsHtml = '<div class="shift-group-list">';
+            for (let shiftType of SHIFT_ORDER) {
+                const groupsWithShift = groupShifts[shiftType];
+                if (!groupsWithShift || groupsWithShift.length === 0) continue;
+                groupsWithShift.sort((a,b) => GROUPS.indexOf(a) - GROUPS.indexOf(b));
+                const shiftClass = (shiftType === "早班" ? "早班" : (shiftType === "小夜" ? "小夜" : (shiftType === "大夜" ? "大夜" : "休假")));
+                const timeLabel = SHIFT_TIMES[shiftType];
+                const timeHtml = (shiftType !== "休假" && timeLabel) ? `<span class="shift-time">${timeLabel}</span>` : '';
+                groupsHtml += `<div class="shift-category"><div class="category-title"><span>${shiftType}</span>${timeHtml}</div><div class="group-tags">${groupsWithShift.map(g => `<span class="group-tag"><span class="group-name">${g}</span><span class="shift-label shift-badge ${shiftClass}">${shiftType}</span></span>`).join('')}</div></div>`;
+            }
+            groupsHtml += '</div>';
+            cell.innerHTML = dateHeader + groupsHtml;
+            currentRow.appendChild(cell);
+            dateCounter++;
+        }
+        const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+        document.getElementById("currentMonthDisplay").innerHTML = `${year}年 ${monthNames[month]}`;
+        updateCaptureTitle(year, month);
+    }
+
+    function goToExactDate(year, month, day) {
+        let targetDate = new Date(year, month, day);
+        if (targetDate.getMonth() !== month || targetDate.getDate() !== day) {
+            const lastDay = getMonthDays(year, month);
+            targetDate = new Date(year, month, lastDay);
+        }
+        currentYear = targetDate.getFullYear();
+        currentMonth = targetDate.getMonth();
+        selectedDate = new Date(currentYear, currentMonth, targetDate.getDate());
+        document.getElementById('yearSelect').value = currentYear;
+        document.getElementById('monthSelect').value = currentMonth + 1;
+        updateDaySelect(currentYear, currentMonth);
+        document.getElementById('daySelect').value = selectedDate.getDate();
+        renderCalendar(currentYear, currentMonth, selectedDate, weekStart);
+    }
+
+    function prevMonth() {
+        let newYear = currentYear, newMonth = currentMonth - 1;
+        if (newMonth < 0) { newMonth = 11; newYear--; }
+        goToExactDate(newYear, newMonth, 1);
+    }
+    function nextMonth() {
+        let newYear = currentYear, newMonth = currentMonth + 1;
+        if (newMonth > 11) { newMonth = 0; newYear++; }
+        goToExactDate(newYear, newMonth, 1);
+    }
+
     function populateYearSelect() {
         const yearSelect = document.getElementById('yearSelect');
-        const startYear = 1950;
-        const endYear = 2150;
-        for (let y = startYear; y <= endYear; y++) {
+        for (let y = 1950; y <= 2150; y++) {
             const opt = document.createElement('option');
             opt.value = y;
             opt.textContent = `${y}年`;
@@ -391,7 +518,6 @@
         }
         yearSelect.value = currentYear;
     }
-
     function populateMonthSelect() {
         const monthSelect = document.getElementById('monthSelect');
         for (let m = 1; m <= 12; m++) {
@@ -402,7 +528,6 @@
         }
         monthSelect.value = currentMonth + 1;
     }
-
     function updateDaySelect(year, month) {
         const daySelect = document.getElementById('daySelect');
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -413,227 +538,94 @@
             opt.textContent = `${d}日`;
             daySelect.appendChild(opt);
         }
-        // 保留當前選定日期的合理性
         let currentDay = selectedDate ? selectedDate.getDate() : 1;
         if (currentDay > daysInMonth) currentDay = daysInMonth;
         daySelect.value = currentDay;
     }
 
-    function getMonthDays(year, month) {
-        return new Date(year, month + 1, 0).getDate();
-    }
-
-    function getFirstDayWeekIndex(year, month) {
-        return new Date(year, month, 1).getDay();
-    }
-
-    // 渲染月曆，並處理今天紅框、選定橘框
-    function renderCalendar(year, month, highlightSelectedDate = null) {
-        const firstDayWeek = getFirstDayWeekIndex(year, month);
-        const daysInMonth = getMonthDays(year, month);
-        const tbody = document.getElementById("calendarBody");
-        tbody.innerHTML = "";
-
-        let dateCounter = 1;
-        let currentRow = null;
-        const totalCells = 42;
-
-        for (let i = 0; i < totalCells; i++) {
-            const weekCol = i % 7;
-            if (weekCol === 0) {
-                currentRow = document.createElement("tr");
-                tbody.appendChild(currentRow);
-            }
-
-            if (i < firstDayWeek || dateCounter > daysInMonth) {
-                const emptyCell = document.createElement("td");
-                emptyCell.style.backgroundColor = "#fafcff";
-                emptyCell.style.verticalAlign = "top";
-                emptyCell.style.padding = "6px 4px";
-                emptyCell.innerHTML = "&nbsp;";
-                currentRow.appendChild(emptyCell);
-                continue;
-            }
-
-            const currentDate = new Date(year, month, dateCounter);
-            const weekDay = currentDate.getDay();
-            const isWeekend = (weekDay === 0 || weekDay === 6);
-
-            const cell = document.createElement("td");
-            cell.style.verticalAlign = "top";
-            cell.style.padding = "6px 4px";
-            if (isWeekend) cell.style.backgroundColor = "#fffaf0";
-            else cell.style.backgroundColor = "#ffffff";
-
-            // 判斷是否為今天 (紅框)
-            const isToday = (currentDate.getTime() === today.getTime());
-            const isSelected = (highlightSelectedDate && currentDate.getTime() === highlightSelectedDate.getTime());
-            if (isToday) {
-                cell.classList.add('today-highlight');
-                cell.style.border = "2px solid #e34234";
-            } else if (isSelected) {
-                cell.classList.add('selected-highlight');
-                cell.style.border = "2px solid #ff8c00";
-            } else {
-                cell.style.border = "1px solid #e6edf4";
-            }
-
-            // 日期標頭
-            const weekStr = ["日", "一", "二", "三", "四", "五", "六"][weekDay];
-            const dateHeader = `
-                <div class="date-header">
-                    <span class="date-number">${dateCounter}</span>
-                    <span style="font-size:0.65rem; color:#7a8eaa;">${weekStr}</span>
-                </div>
-            `;
-
-            // 收集當日各組班型
-            const groupShifts = {};
-            for (let g of GROUPS) {
-                const shift = getShiftByDate(g, currentDate);
-                if (!groupShifts[shift]) groupShifts[shift] = [];
-                groupShifts[shift].push(g);
-            }
-
-            let groupsHtml = '<div class="shift-group-list">';
-            for (let shiftType of SHIFT_ORDER) {
-                const groupsWithShift = groupShifts[shiftType];
-                if (!groupsWithShift || groupsWithShift.length === 0) continue;
-                groupsWithShift.sort((a,b) => GROUPS.indexOf(a) - GROUPS.indexOf(b));
-                const shiftClass = (shiftType === "早班" ? "早班" : (shiftType === "小夜" ? "小夜" : (shiftType === "大夜" ? "大夜" : "休假")));
-                groupsHtml += `
-                    <div class="shift-category">
-                        <div class="category-title">${shiftType}</div>
-                        <div class="group-tags">
-                            ${groupsWithShift.map(g => `
-                                <span class="group-tag">
-                                    <span class="group-name">${g}</span>
-                                    <span class="shift-label shift-badge ${shiftClass}">${shiftType}</span>
-                                </span>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            groupsHtml += '</div>';
-            cell.innerHTML = dateHeader + groupsHtml;
-            currentRow.appendChild(cell);
-            dateCounter++;
-        }
-
-        // 更新標題
-        const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
-        document.getElementById("currentMonthDisplay").innerHTML = `${year}年 ${monthNames[month]}`;
-    }
-
-    // 直接跳轉到指定完整日期 (年月日)
-    function goToExactDate(year, month, day) {
-        // 建構日期物件
-        let targetDate = new Date(year, month, day);
-        // 如果日期無效 (例如 2月30日)，自動修正為當月最後一天
-        if (targetDate.getMonth() !== month || targetDate.getDate() !== day) {
-            const lastDay = getMonthDays(year, month);
-            targetDate = new Date(year, month, lastDay);
-        }
-        // 更新當前年月及選定日期
-        currentYear = targetDate.getFullYear();
-        currentMonth = targetDate.getMonth();
-        selectedDate = new Date(currentYear, currentMonth, targetDate.getDate());
-        
-        // 同步下拉選單
-        document.getElementById('yearSelect').value = currentYear;
-        document.getElementById('monthSelect').value = currentMonth + 1;
-        updateDaySelect(currentYear, currentMonth);
-        document.getElementById('daySelect').value = selectedDate.getDate();
-        
-        renderCalendar(currentYear, currentMonth, selectedDate);
-    }
-
-    // 上下月切換
-    function prevMonth() {
-        let newYear = currentYear;
-        let newMonth = currentMonth - 1;
-        if (newMonth < 0) {
-            newMonth = 11;
-            newYear--;
-        }
-        goToExactDate(newYear, newMonth, 1);
-    }
-
-    function nextMonth() {
-        let newYear = currentYear;
-        let newMonth = currentMonth + 1;
-        if (newMonth > 11) {
-            newMonth = 0;
-            newYear++;
-        }
-        goToExactDate(newYear, newMonth, 1);
-    }
-
-    // 初始化控制項與事件
     function initControls() {
-        const yearSelect = document.getElementById('yearSelect');
-        const monthSelect = document.getElementById('monthSelect');
-        const daySelect = document.getElementById('daySelect');
+        const yearSel = document.getElementById('yearSelect');
+        const monthSel = document.getElementById('monthSelect');
+        const daySel = document.getElementById('daySelect');
         const gotoBtn = document.getElementById('gotoDateBtn');
-        
-        yearSelect.addEventListener('change', () => {
-            const y = parseInt(yearSelect.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
+        yearSel.addEventListener('change', () => {
+            const y = parseInt(yearSel.value), m = parseInt(monthSel.value)-1, d = parseInt(daySel.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) goToExactDate(y, m, d);
         });
-        monthSelect.addEventListener('change', () => {
-            const y = parseInt(yearSelect.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
+        monthSel.addEventListener('change', () => {
+            const y = parseInt(yearSel.value), m = parseInt(monthSel.value)-1, d = parseInt(daySel.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) goToExactDate(y, m, d);
         });
-        daySelect.addEventListener('change', () => {
-            const y = parseInt(yearSelect.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
+        daySel.addEventListener('change', () => {
+            const y = parseInt(yearSel.value), m = parseInt(monthSel.value)-1, d = parseInt(daySel.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) goToExactDate(y, m, d);
         });
         gotoBtn.addEventListener('click', () => {
-            const y = parseInt(yearSelect.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
+            const y = parseInt(yearSel.value), m = parseInt(monthSel.value)-1, d = parseInt(daySel.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) goToExactDate(y, m, d);
         });
-        
         document.getElementById('prevMonthBtn').addEventListener('click', prevMonth);
         document.getElementById('nextMonthBtn').addEventListener('click', nextMonth);
+        
+        const radioSunday = document.querySelector('input[value="0"]');
+        const radioMonday = document.querySelector('input[value="1"]');
+        radioSunday.addEventListener('change', () => {
+            if (radioSunday.checked) { weekStart = 0; renderCalendar(currentYear, currentMonth, selectedDate, 0); }
+        });
+        radioMonday.addEventListener('change', () => {
+            if (radioMonday.checked) { weekStart = 1; renderCalendar(currentYear, currentMonth, selectedDate, 1); }
+        });
     }
 
-    // 初始顯示：以今天所在的月份為基準
+    async function downloadCalendarImage() {
+        const captureElement = document.getElementById('captureArea');
+        if (!captureElement) return;
+        const originalOverflowX = captureElement.style.overflowX;
+        const originalWidth = captureElement.style.width;
+        captureElement.style.overflowX = 'visible';
+        captureElement.style.width = 'max-content';
+        const table = captureElement.querySelector('table');
+        if (table) table.style.width = 'max-content';
+        try {
+            const canvas = await html2canvas(captureElement, {
+                scale: 2.8,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: false,
+                allowTaint: false,
+                windowWidth: captureElement.scrollWidth,
+                windowHeight: captureElement.scrollHeight
+            });
+            const link = document.createElement('a');
+            const yearMonth = document.getElementById('currentMonthDisplay').innerText;
+            link.download = `輪班表_${yearMonth}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (err) {
+            console.error('截圖失敗:', err);
+            alert('產生圖片失敗，請稍後重試。');
+        } finally {
+            captureElement.style.overflowX = originalOverflowX;
+            captureElement.style.width = originalWidth;
+            if (table) table.style.width = '';
+        }
+    }
+
     function init() {
-        let initYear = today.getFullYear();
-        let initMonth = today.getMonth();
+        let initYear = today.getFullYear(), initMonth = today.getMonth();
         currentYear = initYear;
         currentMonth = initMonth;
         selectedDate = new Date(currentYear, currentMonth, Math.min(today.getDate(), getMonthDays(currentYear, currentMonth)));
-        
         populateYearSelect();
         populateMonthSelect();
         updateDaySelect(currentYear, currentMonth);
-        // 同步下拉數值
         document.getElementById('yearSelect').value = currentYear;
         document.getElementById('monthSelect').value = currentMonth + 1;
         document.getElementById('daySelect').value = selectedDate.getDate();
-        
-        renderCalendar(currentYear, currentMonth, selectedDate);
+        renderCalendar(currentYear, currentMonth, selectedDate, weekStart);
         initControls();
+        document.getElementById('downloadBtn').addEventListener('click', downloadCalendarImage);
     }
-    
     init();
 </script>
 </body>
