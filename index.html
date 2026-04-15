@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>萬年輪班系統｜桃園維護組 無限年月查詢</title>
+    <title>萬年輪班系統｜桃園維護組 班表月曆</title>
     <style>
         * {
             box-sizing: border-box;
@@ -69,7 +69,7 @@
             flex-wrap: wrap;
         }
 
-        .date-picker-area select, .date-picker-area input {
+        .date-picker-area select {
             background: white;
             border: 1px solid #cbdde9;
             border-radius: 32px;
@@ -295,7 +295,7 @@
 <div class="container">
     <h1>
         📅 桃園維護組 萬年輪班月曆
-        <small>ML1 · ML2 · ML3 · ML4 (無限年月查詢)</small>
+        <small>ML1 · ML2 · ML3 · ML4 (年份下拉選擇)</small>
     </h1>
     
     <div class="controls">
@@ -329,7 +329,7 @@
         </table>
     </div>
     <footer>
-        ✅ 基準日期：2026-04-01 (取自原始班表) · 無年份限制，可任意查詢前後千年 · 紅框為今日日期 · 橘框為選定日期
+        ✅ 基準日期：2026-04-01 (取自原始班表) · 年份範圍 1950~2150 (可透過上下月無限延伸) · 紅框為今日日期 · 橘框為選定日期
     </footer>
 </div>
 
@@ -351,8 +351,7 @@
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
 
     /**
-     * 計算目標日期與基準日期的天數差 (只考慮日期，無限制範圍)
-     * 使用純數學計算，支援任意前後年份 (包括負數)
+     * 計算目標日期與基準日期的天數差 (只考慮日期，支援任何年份)
      */
     function daysFromBase(targetDate) {
         const base = new Date(BASE_DATE.getFullYear(), BASE_DATE.getMonth(), BASE_DATE.getDate());
@@ -379,92 +378,45 @@
     let today = new Date();     // 真實今天
     today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    // 動態產生年份下拉選單 (從西元元年到 9999，但實務上提供一個較大範圍，使用者可手動輸入)
-    // 為了方便，提供一個範圍 -5000 到 5000 或更寬，但下拉選單不宜過長，改用 input number 讓使用者輸入年份會更佳。
-    // 為符合「取消年限限制」，改用文字輸入框讓使用者任意輸入年份，保留月份/日期下拉。
-    // 這樣使用者可輸入任何整數年份 (負數表示公元前亦可，但 JS Date 物件支援 0~99 為 1900 年代，負數較複雜，
-    // 為簡化且確保日期正確，我們使用標準 Date 物件，它支援公元 1 年到 275760 年，負數年份不支援。因此我們允許 1 ~ 9999 年。
-    // 若使用者想查公元前，可自行轉換，但實務上不需要。提供 1~9999 足夠。
-    function populateDateSelectors() {
+    // 動態產生年份下拉選單 (範圍 1950 ~ 2150，足夠一般使用，且可透過上下月按鈕任意移動)
+    function populateYearSelect() {
         const yearSelect = document.getElementById('yearSelect');
+        const startYear = 1950;
+        const endYear = 2150;
+        for (let y = startYear; y <= endYear; y++) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = `${y}年`;
+            yearSelect.appendChild(opt);
+        }
+        yearSelect.value = currentYear;
+    }
+
+    function populateMonthSelect() {
         const monthSelect = document.getElementById('monthSelect');
-        const daySelect = document.getElementById('daySelect');
-        
-        // 年份選項：提供一個範圍從 1900 到 2100 不夠萬年，改為 input number 讓使用者自由輸入
-        // 因此將 select 改為 input type="number"
-        const yearInput = document.createElement('input');
-        yearInput.type = 'number';
-        yearInput.id = 'yearInput';
-        yearInput.placeholder = '年份';
-        yearInput.value = currentYear;
-        yearInput.style.width = '90px';
-        yearInput.style.padding = '6px 8px';
-        yearInput.style.borderRadius = '32px';
-        yearInput.style.border = '1px solid #cbdde9';
-        
-        // 取代原本的 select
-        yearSelect.parentNode.replaceChild(yearInput, yearSelect);
-        yearInput.id = 'yearInput';
-        
-        // 月份 1~12
         for (let m = 1; m <= 12; m++) {
             const opt = document.createElement('option');
             opt.value = m;
             opt.textContent = `${m}月`;
             monthSelect.appendChild(opt);
         }
-        
-        // 日期更新函數
-        function updateDaySelectWithYearMonth() {
-            const y = parseInt(yearInput.value);
-            const m = parseInt(monthSelect.value) - 1;
-            if (isNaN(y) || isNaN(m)) return;
-            const daysInMonth = getMonthDays(y, m);
-            daySelect.innerHTML = '';
-            for (let d = 1; d <= daysInMonth; d++) {
-                const opt = document.createElement('option');
-                opt.value = d;
-                opt.textContent = `${d}日`;
-                daySelect.appendChild(opt);
-            }
-            // 保持原本選定日期在範圍內
-            let currentDay = parseInt(daySelect.value);
-            if (isNaN(currentDay) || currentDay > daysInMonth) currentDay = 1;
-            daySelect.value = currentDay;
+        monthSelect.value = currentMonth + 1;
+    }
+
+    function updateDaySelect(year, month) {
+        const daySelect = document.getElementById('daySelect');
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        daySelect.innerHTML = '';
+        for (let d = 1; d <= daysInMonth; d++) {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = `${d}日`;
+            daySelect.appendChild(opt);
         }
-        
-        yearInput.addEventListener('change', () => {
-            updateDaySelectWithYearMonth();
-            const y = parseInt(yearInput.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
-        });
-        monthSelect.addEventListener('change', () => {
-            updateDaySelectWithYearMonth();
-            const y = parseInt(yearInput.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
-        });
-        daySelect.addEventListener('change', () => {
-            const y = parseInt(yearInput.value);
-            const m = parseInt(monthSelect.value) - 1;
-            const d = parseInt(daySelect.value);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                goToExactDate(y, m, d);
-            }
-        });
-        
-        // 初始化日期選單
-        updateDaySelectWithYearMonth();
-        
-        // 儲存額外引用
-        window.yearInput = yearInput;
+        // 保留當前選定日期的合理性
+        let currentDay = selectedDate ? selectedDate.getDate() : 1;
+        if (currentDay > daysInMonth) currentDay = daysInMonth;
+        daySelect.value = currentDay;
     }
 
     function getMonthDays(year, month) {
@@ -576,35 +528,23 @@
 
     // 直接跳轉到指定完整日期 (年月日)
     function goToExactDate(year, month, day) {
-        // 建構日期物件 (注意 month 是 0-index)
+        // 建構日期物件
         let targetDate = new Date(year, month, day);
-        // 如果日期無效 (例如 2月30日)，會自動進位到下個月，我們需要處理避免異常
+        // 如果日期無效 (例如 2月30日)，自動修正為當月最後一天
         if (targetDate.getMonth() !== month || targetDate.getDate() !== day) {
-            // 日期無效，修正為當月最後一天
             const lastDay = getMonthDays(year, month);
             targetDate = new Date(year, month, lastDay);
         }
-        // 切換月份到該日期所在月份
+        // 更新當前年月及選定日期
         currentYear = targetDate.getFullYear();
         currentMonth = targetDate.getMonth();
         selectedDate = new Date(currentYear, currentMonth, targetDate.getDate());
         
-        // 同步 UI 元件
-        if (window.yearInput) {
-            window.yearInput.value = currentYear;
-        }
+        // 同步下拉選單
+        document.getElementById('yearSelect').value = currentYear;
         document.getElementById('monthSelect').value = currentMonth + 1;
-        // 更新日期的下拉選單內容
-        const daySelect = document.getElementById('daySelect');
-        const daysInMonth = getMonthDays(currentYear, currentMonth);
-        daySelect.innerHTML = '';
-        for (let d = 1; d <= daysInMonth; d++) {
-            const opt = document.createElement('option');
-            opt.value = d;
-            opt.textContent = `${d}日`;
-            daySelect.appendChild(opt);
-        }
-        daySelect.value = selectedDate.getDate();
+        updateDaySelect(currentYear, currentMonth);
+        document.getElementById('daySelect').value = selectedDate.getDate();
         
         renderCalendar(currentYear, currentMonth, selectedDate);
     }
@@ -617,7 +557,6 @@
             newMonth = 11;
             newYear--;
         }
-        // 無限制，直接切換
         goToExactDate(newYear, newMonth, 1);
     }
 
@@ -633,49 +572,69 @@
 
     // 初始化控制項與事件
     function initControls() {
+        const yearSelect = document.getElementById('yearSelect');
+        const monthSelect = document.getElementById('monthSelect');
+        const daySelect = document.getElementById('daySelect');
         const gotoBtn = document.getElementById('gotoDateBtn');
+        
+        yearSelect.addEventListener('change', () => {
+            const y = parseInt(yearSelect.value);
+            const m = parseInt(monthSelect.value) - 1;
+            const d = parseInt(daySelect.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                goToExactDate(y, m, d);
+            }
+        });
+        monthSelect.addEventListener('change', () => {
+            const y = parseInt(yearSelect.value);
+            const m = parseInt(monthSelect.value) - 1;
+            const d = parseInt(daySelect.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                goToExactDate(y, m, d);
+            }
+        });
+        daySelect.addEventListener('change', () => {
+            const y = parseInt(yearSelect.value);
+            const m = parseInt(monthSelect.value) - 1;
+            const d = parseInt(daySelect.value);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                goToExactDate(y, m, d);
+            }
+        });
         gotoBtn.addEventListener('click', () => {
-            const y = parseInt(window.yearInput.value);
-            const m = parseInt(document.getElementById('monthSelect').value) - 1;
-            const d = parseInt(document.getElementById('daySelect').value);
+            const y = parseInt(yearSelect.value);
+            const m = parseInt(monthSelect.value) - 1;
+            const d = parseInt(daySelect.value);
             if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
                 goToExactDate(y, m, d);
             }
         });
         
-        // 綁定上下月按鈕
         document.getElementById('prevMonthBtn').addEventListener('click', prevMonth);
         document.getElementById('nextMonthBtn').addEventListener('click', nextMonth);
     }
 
     // 初始顯示：以今天所在的月份為基準
-    function initToday() {
+    function init() {
         let initYear = today.getFullYear();
         let initMonth = today.getMonth();
         currentYear = initYear;
         currentMonth = initMonth;
         selectedDate = new Date(currentYear, currentMonth, Math.min(today.getDate(), getMonthDays(currentYear, currentMonth)));
         
-        populateDateSelectors();  // 建立年份輸入框、月份/日期下拉
-        // 同步年份輸入框
-        if (window.yearInput) window.yearInput.value = currentYear;
+        populateYearSelect();
+        populateMonthSelect();
+        updateDaySelect(currentYear, currentMonth);
+        // 同步下拉數值
+        document.getElementById('yearSelect').value = currentYear;
         document.getElementById('monthSelect').value = currentMonth + 1;
-        const daySelect = document.getElementById('daySelect');
-        const daysInMonth = getMonthDays(currentYear, currentMonth);
-        daySelect.innerHTML = '';
-        for (let d = 1; d <= daysInMonth; d++) {
-            const opt = document.createElement('option');
-            opt.value = d;
-            opt.textContent = `${d}日`;
-            daySelect.appendChild(opt);
-        }
-        daySelect.value = selectedDate.getDate();
+        document.getElementById('daySelect').value = selectedDate.getDate();
         
         renderCalendar(currentYear, currentMonth, selectedDate);
         initControls();
     }
     
-    initToday();
+    init();
 </script>
 </body>
 </html>
