@@ -204,23 +204,26 @@
             text-align: center;
             font-size: 0.85rem;
         }
-        /* 所有 td 預設黑色粗邊框 */
+        /* 所有日期儲存格預設黑色粗邊框 */
         .calendar-table td {
             border: 2px solid #333333;
             padding: 10px 8px;
             vertical-align: top;
             background-color: #ffffff;
         }
-        /* 今天與選定日期的邊框覆蓋為彩色粗邊框 */
-        .today-highlight {
-            border: 2px solid #e34234 !important;
-            border-radius: 16px;
+        /* 今天的紅色框 */
+        .calendar-table td.today-cell {
+            border: 3px solid #e34234 !important;
             background-color: #fff8f5;
         }
-        .selected-highlight {
-            border: 2px solid #ff9f2e !important;
-            border-radius: 16px;
+        /* 選定日期的紅色框（與今天相同，但若同時為今天則以今天樣式為主） */
+        .calendar-table td.selected-cell {
+            border: 3px solid #e34234 !important;
             background-color: #fffaf0;
+        }
+        /* 今天且同時為選定日期時，保留紅色框 */
+        .calendar-table td.today-cell.selected-cell {
+            border: 3px solid #e34234 !important;
         }
         .date-header {
             display: flex;
@@ -364,7 +367,7 @@
             <tbody id="calendarBody"></tbody>
         </table>
     </div>
-    <footer>✅ 基準日期：2026-04-01 · 年份範圍 1950~2150 · 紅框為今日 · 橘框為選定日期<br>📌 可切換「週日/週一」為每週第一天，下載圖片會自動帶入年月標題。</footer>
+    <footer>✅ 基準日期：2026-04-01 · 年份範圍 1950~2150 · 紅框為今日 · 選定日期同樣為紅框<br>📌 可切換「週日/週一」為每週第一天，下載圖片會自動帶入年月標題。</footer>
 </div>
 
 <script>
@@ -462,17 +465,18 @@
             cell.style.verticalAlign = "top";
             cell.style.padding = "10px 8px";
             cell.style.backgroundColor = isWeekend ? "#fffcf5" : "#ffffff";
+            
             const isToday = (currentDate.getTime() === today.getTime());
             const isSelected = (highlightSelectedDate && currentDate.getTime() === highlightSelectedDate.getTime());
+            
+            // 使用 class 控制邊框樣式
             if (isToday) {
-                cell.classList.add('today-highlight');
-                cell.style.border = "2px solid #e34234";
-            } else if (isSelected) {
-                cell.classList.add('selected-highlight');
-                cell.style.border = "2px solid #ff9f2e";
-            } else {
-                cell.style.border = "2px solid #333333";
+                cell.classList.add('today-cell');
             }
+            if (isSelected) {
+                cell.classList.add('selected-cell');
+            }
+            
             const weekStr = headers[weekCol];
             const dateHeader = `<div class="date-header"><span class="date-number">${dateCounter}</span><span style="font-size:0.7rem; color:#7f9cbb;">${weekStr}</span></div>`;
             
