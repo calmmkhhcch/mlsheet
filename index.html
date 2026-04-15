@@ -10,7 +10,6 @@
             box-sizing: border-box;
             font-family: system-ui, 'Segoe UI', 'Noto Sans TC', '微軟正黑體', sans-serif;
         }
-        /* 整體背景米白色 */
         body {
             background: #fef7e6;
             margin: 0;
@@ -145,6 +144,7 @@
             border-radius: 48px;
             color: #5a3e1b;
         }
+        /* 圖例區域：每個項目用獨立背景色圓角標籤，包住班型名稱與時間 */
         .legend {
             display: flex;
             flex-wrap: wrap;
@@ -158,27 +158,26 @@
         .legend-item {
             display: inline-flex;
             align-items: center;
+            gap: 0;
+        }
+        .legend-badge {
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
-            color: #5a3e1b;
-        }
-        .shift-badge {
-            display: inline-block;
-            width: 56px;
-            text-align: center;
-            padding: 4px 0;
-            border-radius: 28px;
+            padding: 4px 12px;
+            border-radius: 40px;
             font-weight: bold;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
         }
-        .shift-badge.休假 { background: #d4f1d4; color: #2c5a2c; }
-        /* 早班淺紅色 */
-        .shift-badge.早班 { background: #fcc5c5; color: #8b0000; }
-        /* 小夜淺黃色 */
-        .shift-badge.小夜 { background: #fff0b3; color: #8a6e2c; }
-        /* 大夜淺藍色 */
-        .shift-badge.大夜 { background: #cce5ff; color: #003366; }
-        
-        /* 月曆外框 */
+        .legend-badge.休假 { background: #d4f1d4; color: #2c5a2c; }
+        .legend-badge.早班 { background: #fcc5c5; color: #8b0000; }
+        .legend-badge.小夜 { background: #fff0b3; color: #8a6e2c; }
+        .legend-badge.大夜 { background: #cce5ff; color: #003366; }
+        .legend-time {
+            font-size: 0.7rem;
+            font-weight: normal;
+            margin-left: 4px;
+        }
         .calendar-wrapper {
             overflow-x: auto;
             border-radius: 28px;
@@ -225,10 +224,6 @@
             border: 3px solid #e34234 !important;
             background-color: #fff0e8;
         }
-        .calendar-table td.today-cell.selected-cell {
-            border: 3px solid #e34234 !important;
-        }
-        /* 日期標頭：垂直置中，字體一致 */
         .date-header {
             display: flex;
             justify-content: space-between;
@@ -286,36 +281,21 @@
             align-items: center;
             width: 100%;
         }
-        /* 早班淺紅色 */
         .category-title.早班 { background: #fcc5c5; color: #8b0000; }
-        /* 小夜淺黃色 */
         .category-title.小夜 { background: #fff0b3; color: #8a6e2c; }
-        /* 大夜淺藍色 */
         .category-title.大夜 { background: #cce5ff; color: #003366; }
         .category-title.休假 { background: #d4f1d4; color: #2c5a2c; }
-        .shift-time {
+        .shift-time, .shift-time-rz {
             font-size: 0.7rem;
             font-weight: normal;
             margin-left: 8px;
         }
-        .placeholder-time {
-            visibility: hidden;
-            font-size: 0.7rem;
-            font-weight: normal;
-            margin-left: 8px;
-            min-width: 85px;
-            display: inline-block;
-        }
-        .category-title.大夜 .shift-time { color: #003366; }
-        .category-title.早班 .shift-time { color: #8b0000; }
-        .category-title.小夜 .shift-time { color: #8a6e2c; }
         .group-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 4px;
         }
-        /* 修正 ML 字母與數字垂直對齊 */
         .group-tag {
             display: inline-flex;
             align-items: center;
@@ -364,7 +344,6 @@
             .holiday-name, .date-header > span:last-child { font-size: 0.85rem; }
             .capture-title { font-size: 1.1rem; }
             .calendar-table td { padding: 6px 4px; }
-            .placeholder-time { min-width: 65px; }
         }
     </style>
 </head>
@@ -391,11 +370,13 @@
             <button id="nextMonthBtn">下月 ▶</button>
         </div>
     </div>
+
+    <!-- 圖例區：班型名稱與時間都被背景色包覆 -->
     <div class="legend">
-        <div class="legend-item"><span class="shift-badge 休假">休假</span> 休息日</div>
-        <div class="legend-item"><span class="shift-badge 早班">早班</span> 06:00-14:00</div>
-        <div class="legend-item"><span class="shift-badge 小夜">小夜</span> 14:30-22:30</div>
-        <div class="legend-item"><span class="shift-badge 大夜">大夜</span> 22:30-06:30</div>
+        <div class="legend-item"><span class="legend-badge 休假">休假 <span class="legend-time">R,Z</span></span></div>
+        <div class="legend-item"><span class="legend-badge 早班">早班 <span class="legend-time">06:00-14:00</span></span></div>
+        <div class="legend-item"><span class="legend-badge 小夜">小夜 <span class="legend-time">14:30-22:30</span></span></div>
+        <div class="legend-item"><span class="legend-badge 大夜">大夜 <span class="legend-time">22:30-06:30</span></span></div>
         <div class="legend-item" style="margin-left:auto;">🔁 排序：早班 → 小夜 → 大夜 → 休假</div>
     </div>
 
@@ -421,7 +402,7 @@
     const GROUPS = ["ML1", "ML2", "ML3", "ML4"];
     const BASE_DATE = new Date(2026, 3, 1);
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
-    const SHIFT_TIMES = { "早班": "06:00-14:00", "小夜": "14:30-22:30", "大夜": "22:30-06:30", "休假": "" };
+    const SHIFT_TIMES = { "早班": "06:00-14:00", "小夜": "14:30-22:30", "大夜": "22:30-06:30", "休假": "R,Z" };
 
     // 台灣節日資料
     function getHolidayName(month, day, year) {
@@ -513,7 +494,7 @@
         const thead = document.getElementById("tableHeader");
         tbody.innerHTML = "";
         const headers = getWeekdayHeaders(startWeek);
-        thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+        thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</td>`;
         
         let dateCounter = 1;
         let currentRow = null;
@@ -587,9 +568,9 @@
                 } else if (shiftType === '大夜') {
                     titleClass = '大夜';
                     timeHtml = `<span class="shift-time">${timeLabel}</span>`;
-                } else {
+                } else { // 休假
                     titleClass = '休假';
-                    timeHtml = `<span class="placeholder-time">${timeLabel}</span>`;
+                    timeHtml = `<span class="shift-time-rz">${timeLabel}</span>`;
                 }
                 if (shiftType === '休假' && hasPreviousShift) {
                     groupsHtml += `<div class="shift-separator"></div>`;
