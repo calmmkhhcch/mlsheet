@@ -267,13 +267,12 @@
             font-weight: normal;
             margin-left: 8px;
         }
-        /* 休假的佔位符，維持與時間文字相同寬度 */
         .placeholder-time {
             visibility: hidden;
             font-size: 0.7rem;
             font-weight: normal;
             margin-left: 8px;
-            min-width: 85px;  /* 與實際時間文字寬度相當 */
+            min-width: 85px;
             display: inline-block;
         }
         .category-title.大夜 .shift-time {
@@ -284,9 +283,6 @@
         }
         .category-title.小夜 .shift-time {
             color: #004080;
-        }
-        .category-title.休假 .shift-time {
-            color: #2c5a2c;
         }
         .group-tags {
             display: flex;
@@ -360,9 +356,9 @@
     </div>
     <div class="legend">
         <div class="legend-item"><span class="shift-badge 休假">休假</span> 休息日</div>
-        <div class="legend-item"><span class="shift-badge 早班">早班</span> 05:30-13:30</div>
-        <div class="legend-item"><span class="shift-badge 小夜">小夜</span> 13:30-21:30</div>
-        <div class="legend-item"><span class="shift-badge 大夜">大夜</span> 21:30-05:30</div>
+        <div class="legend-item"><span class="shift-badge 早班">早班</span> 06:00-14:00</div>
+        <div class="legend-item"><span class="shift-badge 小夜">小夜</span> 14:30-22:30</div>
+        <div class="legend-item"><span class="shift-badge 大夜">大夜</span> 22:30-06:30</div>
         <div class="legend-item" style="margin-left:auto;">🔁 排序：早班 → 小夜 → 大夜 → 休假</div>
     </div>
 
@@ -388,7 +384,8 @@
     const GROUPS = ["ML1", "ML2", "ML3", "ML4"];
     const BASE_DATE = new Date(2026, 3, 1);
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
-    const SHIFT_TIMES = { "早班": "05:30-13:30", "小夜": "13:30-21:30", "大夜": "21:30-05:30", "休假": "" };
+    // 更新班型時間
+    const SHIFT_TIMES = { "早班": "06:00-14:00", "小夜": "14:30-22:30", "大夜": "22:30-06:30", "休假": "" };
 
     function daysFromBase(targetDate) {
         const base = new Date(BASE_DATE.getFullYear(), BASE_DATE.getMonth(), BASE_DATE.getDate());
@@ -429,7 +426,6 @@
         }
     }
 
-    // 格式化今天的日期為 DD/MMM/YYYY (英文月份縮寫)
     function formatTodayDate() {
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const d = today.getDate();
@@ -438,7 +434,6 @@
         return `${d}/${m}/${y}`;
     }
 
-    // 更新主標題（包含今天日期）
     function updateMainTitle() {
         const titleEl = document.getElementById('mainTitle');
         if (titleEl) {
@@ -530,7 +525,6 @@
                     timeHtml = `<span class="shift-time">${timeLabel}</span>`;
                 } else { // 休假
                     titleClass = '休假';
-                    // 加入隱形佔位符，使左右平衡，視覺寬度與其他班型一致
                     timeHtml = `<span class="placeholder-time">${timeLabel}</span>`;
                 }
                 groupsHtml += `
