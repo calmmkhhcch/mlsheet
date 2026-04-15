@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>萬年輪班系統｜航線修護本部 班表月曆 (含台灣節日)</title>
+    <title>萬年輪班系統｜航線修護本部 班表月曆</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
             font-family: system-ui, 'Segoe UI', 'Noto Sans TC', '微軟正黑體', sans-serif;
         }
+        /* 整體背景米白色 */
         body {
-            background: #e6edf4;
+            background: #fef7e6;
             margin: 0;
             padding: 20px 16px;
             display: flex;
@@ -22,9 +23,9 @@
         .container {
             max-width: 1400px;
             width: 100%;
-            background: #ffffff;
+            background: #fef7e6;
             border-radius: 32px;
-            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
             padding: 20px 20px 24px 20px;
         }
         .header-area {
@@ -38,15 +39,15 @@
         h1 {
             font-size: 1.6rem;
             margin: 0;
-            color: #1e466e;
+            color: #5a3e1b;
         }
         h1 small {
             font-size: 0.75rem;
             font-weight: normal;
-            background: #eef2f7;
+            background: #e6d9bf;
             padding: 4px 12px;
             border-radius: 40px;
-            color: #2c5a7a;
+            color: #5a3e1b;
             margin-left: 8px;
         }
         .btn-download {
@@ -79,7 +80,7 @@
         .date-picker-area {
             display: flex;
             gap: 10px;
-            background: #f0f5fa;
+            background: #e6d9bf;
             padding: 6px 16px;
             border-radius: 60px;
             align-items: center;
@@ -101,7 +102,7 @@
             border: none;
         }
         .week-start-option {
-            background: #f0f5fa;
+            background: #e6d9bf;
             padding: 6px 16px;
             border-radius: 60px;
             display: flex;
@@ -114,6 +115,8 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
+            color: #5a3e1b;
+            font-weight: 500;
         }
         .month-nav {
             display: flex;
@@ -121,43 +124,42 @@
             align-items: center;
         }
         .month-nav button {
-            background: #ffffff;
-            border: 1px solid #cbdde9;
+            background: #e6d9bf;
+            border: none;
             font-size: 1rem;
             padding: 8px 18px;
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
-            color: #1e466e;
+            color: #5a3e1b;
+            transition: 0.2s;
         }
         .month-nav button:hover {
-            background: #eef2ff;
+            background: #d8cbae;
         }
         .current-month {
             font-size: 1.3rem;
             font-weight: 800;
-            background: #ffffffdd;
+            background: #e6d9bf;
             padding: 6px 24px;
             border-radius: 48px;
-            backdrop-filter: blur(4px);
-            color: #1e466e;
-            border: 1px solid #d4e2f0;
+            color: #5a3e1b;
         }
         .legend {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            background: #f8fafd;
+            background: #e6d9bf;
             padding: 10px 20px;
             border-radius: 60px;
             margin: 10px 0 20px 0;
             font-size: 0.75rem;
-            border: 1px solid #e2edf2;
         }
         .legend-item {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            color: #5a3e1b;
         }
         .shift-badge {
             display: inline-block;
@@ -169,14 +171,19 @@
             font-size: 0.7rem;
         }
         .shift-badge.休假 { background: #d4f1d4; color: #2c5a2c; }
-        .shift-badge.早班 { background: #f9d56e; color: #5e3a00; }
-        .shift-badge.小夜 { background: #a8d8ff; color: #004080; }
-        .shift-badge.大夜 { background: #5a6e7a; color: white; }
+        /* 早班淺紅色 */
+        .shift-badge.早班 { background: #fcc5c5; color: #8b0000; }
+        /* 小夜淺黃色 */
+        .shift-badge.小夜 { background: #fff0b3; color: #8a6e2c; }
+        /* 大夜淺藍色 */
+        .shift-badge.大夜 { background: #cce5ff; color: #003366; }
+        
+        /* 月曆外框 */
         .calendar-wrapper {
             overflow-x: auto;
             border-radius: 28px;
-            border: 1px solid #e9f0f5;
-            background: #ffffff;
+            border: 1px solid #d4c8b0;
+            background: #fef7e6;
             box-shadow: 0 6px 14px rgba(0,0,0,0.05);
         }
         .capture-title {
@@ -185,9 +192,9 @@
             font-weight: 800;
             padding: 12px 0 8px 0;
             margin: 0;
-            color: #1e466e;
-            background: white;
-            border-bottom: 2px solid #d4e2f0;
+            color: #5a3e1b;
+            background: #fef7e6;
+            border-bottom: 2px solid #e6d9bf;
         }
         .calendar-table {
             width: 100%;
@@ -196,11 +203,11 @@
             min-width: 800px;
         }
         .calendar-table th {
-            background: #eef3fc;
+            background: #e6d9bf;
             padding: 14px 6px;
             font-weight: 700;
-            color: #1f4e79;
-            border-bottom: 2px solid #d4e2f0;
+            color: #5a3e1b;
+            border-bottom: 2px solid #d4c8b0;
             text-align: center;
             font-size: 0.85rem;
         }
@@ -208,25 +215,26 @@
             border: 2px solid #333333;
             padding: 10px 8px;
             vertical-align: top;
-            background-color: #ffffff;
+            background-color: #fef7e6;
         }
         .calendar-table td.today-cell {
             border: 3px solid #e34234 !important;
-            background-color: #fff8f5;
+            background-color: #fff0e8;
         }
         .calendar-table td.selected-cell {
             border: 3px solid #e34234 !important;
-            background-color: #fffaf0;
+            background-color: #fff0e8;
         }
         .calendar-table td.today-cell.selected-cell {
             border: 3px solid #e34234 !important;
         }
+        /* 日期標頭：垂直置中，字體一致 */
         .date-header {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
+            align-items: center;
             margin-bottom: 10px;
-            border-bottom: 1px solid #eef2f8;
+            border-bottom: 1px solid #e6d9bf;
             padding-bottom: 5px;
         }
         .date-info {
@@ -238,13 +246,13 @@
         .date-number {
             font-weight: 800;
             font-size: 1rem;
-            color: #1e466e;
-            background: #f0f6fe;
+            color: #5a3e1b;
+            background: #e6d9bf;
             padding: 2px 10px;
             border-radius: 40px;
         }
         .holiday-name {
-            font-size: 0.7rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #c0392b;
             background: #ffe6e2;
@@ -252,13 +260,18 @@
             border-radius: 30px;
             white-space: nowrap;
         }
+        .date-header > span:last-child {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #7a6a4e;
+        }
         .shift-group-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
         .shift-category {
-            background: #ffffff;
+            background: #fef7e6;
             border-radius: 16px;
             padding: 2px 0;
         }
@@ -273,9 +286,12 @@
             align-items: center;
             width: 100%;
         }
-        .category-title.早班 { background: #fef0c0; color: #8a6e2c; }
-        .category-title.小夜 { background: #cce5ff; color: #004080; }
-        .category-title.大夜 { background: #4a5b66; color: white; }
+        /* 早班淺紅色 */
+        .category-title.早班 { background: #fcc5c5; color: #8b0000; }
+        /* 小夜淺黃色 */
+        .category-title.小夜 { background: #fff0b3; color: #8a6e2c; }
+        /* 大夜淺藍色 */
+        .category-title.大夜 { background: #cce5ff; color: #003366; }
         .category-title.休假 { background: #d4f1d4; color: #2c5a2c; }
         .shift-time {
             font-size: 0.7rem;
@@ -290,37 +306,38 @@
             min-width: 85px;
             display: inline-block;
         }
-        .category-title.大夜 .shift-time {
-            color: white;
-        }
-        .category-title.早班 .shift-time {
-            color: #8a6e2c;
-        }
-        .category-title.小夜 .shift-time {
-            color: #004080;
-        }
+        .category-title.大夜 .shift-time { color: #003366; }
+        .category-title.早班 .shift-time { color: #8b0000; }
+        .category-title.小夜 .shift-time { color: #8a6e2c; }
         .group-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 4px;
         }
+        /* 修正 ML 字母與數字垂直對齊 */
         .group-tag {
             display: inline-flex;
             align-items: center;
-            font-size: 1rem;
-            font-weight: 700;
+            gap: 6px;
             background: #f8fafd;
             padding: 4px 12px;
             border-radius: 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.2;
         }
         .group-tag .ml-letter {
             font-weight: 700;
             color: #2c3e50;
+            display: inline-block;
+            vertical-align: middle;
         }
         .group-tag .ml-number {
             font-weight: 800;
             font-size: 1.1rem;
+            display: inline-block;
+            vertical-align: middle;
         }
         .ml-number.ml1 { color: #e74c3c; }
         .ml-number.ml2 { color: #f1c40f; text-shadow: 0 0 1px rgba(0,0,0,0.2); }
@@ -334,17 +351,17 @@
             margin-top: 20px;
             text-align: center;
             font-size: 0.7rem;
-            color: #7a9cbb;
-            border-top: 1px solid #e2edf2;
+            color: #7a6a4e;
+            border-top: 1px solid #e6d9bf;
             padding-top: 16px;
         }
         @media (max-width: 750px) {
             .container { padding: 12px; }
-            .group-tag { font-size: 0.85rem; padding: 3px 10px; }
-            .group-tag .ml-number { font-size: 1rem; }
+            .group-tag { font-size: 0.85rem; padding: 3px 8px; gap: 4px; }
+            .group-tag .ml-number { font-size: 0.95rem; }
             .category-title { font-size: 0.7rem; padding: 4px 8px; }
             .date-number { font-size: 0.85rem; }
-            .holiday-name { font-size: 0.6rem; white-space: normal; }
+            .holiday-name, .date-header > span:last-child { font-size: 0.85rem; }
             .capture-title { font-size: 1.1rem; }
             .calendar-table td { padding: 6px 4px; }
             .placeholder-time { min-width: 65px; }
@@ -406,9 +423,8 @@
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
     const SHIFT_TIMES = { "早班": "06:00-14:00", "小夜": "14:30-22:30", "大夜": "22:30-06:30", "休假": "" };
 
-    // ======================= 台灣節日資料 (公曆固定日期 + 清明節動態) =======================
+    // 台灣節日資料
     function getHolidayName(month, day, year) {
-        // month 0-11
         const key = `${month+1}/${day}`;
         const fixedHolidays = {
             "1/1": "元旦",
@@ -421,15 +437,10 @@
             "12/25": "行憲紀念日"
         };
         if (fixedHolidays[key]) return fixedHolidays[key];
-        // 清明節：4月4日或4月5日 (年份判斷，通常4月4日或5日)
-        if (month+1 === 4 && (day === 4 || day === 5)) {
-            // 簡單規則：2000年以後，清明節多在4月4日，但可根據年份微調，這裡統一顯示「清明節」
-            return "清明節";
-        }
+        if (month+1 === 4 && (day === 4 || day === 5)) return "清明節";
         return null;
     }
 
-    // ======================= 日期計算函數 =======================
     function daysFromBase(targetDate) {
         const base = new Date(BASE_DATE.getFullYear(), BASE_DATE.getMonth(), BASE_DATE.getDate());
         const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
@@ -515,7 +526,7 @@
             }
             if (i < offset || dateCounter > daysInMonth) {
                 const emptyCell = document.createElement("td");
-                emptyCell.style.backgroundColor = "#fafcff";
+                emptyCell.style.backgroundColor = "#fef7e6";
                 emptyCell.style.padding = "10px 6px";
                 emptyCell.innerHTML = "&nbsp;";
                 currentRow.appendChild(emptyCell);
@@ -527,7 +538,7 @@
             const cell = document.createElement("td");
             cell.style.verticalAlign = "top";
             cell.style.padding = "10px 8px";
-            cell.style.backgroundColor = isWeekend ? "#fffcf5" : "#ffffff";
+            cell.style.backgroundColor = isWeekend ? "#fef7e6" : "#fef7e6";
             
             const isToday = (currentDate.getTime() === today.getTime());
             const isSelected = (highlightSelectedDate && currentDate.getTime() === highlightSelectedDate.getTime());
@@ -540,7 +551,6 @@
             }
             
             const weekStr = headers[weekCol];
-            // 取得節日名稱
             const holiday = getHolidayName(month, dateCounter, year);
             const dateHeader = `
                 <div class="date-header">
@@ -548,7 +558,7 @@
                         <span class="date-number">${dateCounter}號</span>
                         ${holiday ? `<span class="holiday-name">${holiday}</span>` : ''}
                     </div>
-                    <span style="font-size:0.7rem; color:#7f9cbb;">${weekStr}</span>
+                    <span>${weekStr}</span>
                 </div>
             `;
             
@@ -715,7 +725,7 @@
         try {
             const canvas = await html2canvas(captureElement, {
                 scale: 2.8,
-                backgroundColor: '#ffffff',
+                backgroundColor: '#fef7e6',
                 logging: false,
                 useCORS: false,
                 allowTaint: false,
