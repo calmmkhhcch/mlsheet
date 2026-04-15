@@ -168,10 +168,10 @@
             font-weight: bold;
             font-size: 0.7rem;
         }
-        .shift-badge.休假 { background: #cddae9; color: #3a4a66; }
+        .shift-badge.休假 { background: #d4f1d4; color: #2c5a2c; }   /* 淺綠色 */
         .shift-badge.早班 { background: #f9d56e; color: #5e3a00; }
-        .shift-badge.小夜 { background: #6fbf8c; color: #1d4d2a; }
-        .shift-badge.大夜 { background: #2c3e66; color: white; }
+        .shift-badge.小夜 { background: #a8d8ff; color: #004080; }
+        .shift-badge.大夜 { background: #5a6e7a; color: white; }
         .calendar-wrapper {
             overflow-x: auto;
             border-radius: 28px;
@@ -179,7 +179,6 @@
             background: #ffffff;
             box-shadow: 0 6px 14px rgba(0,0,0,0.05);
         }
-        /* 截圖區域內部的標題區 */
         .capture-title {
             text-align: center;
             font-size: 1.4rem;
@@ -240,59 +239,76 @@
         .shift-group-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         .shift-category {
             background: #ffffff;
             border-radius: 16px;
             padding: 2px 0;
         }
+        /* 讓每個班型標題區塊寬度一致，並使用 flex 對齊 */
         .category-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #2c6288;
-            margin-bottom: 4px;
-            padding-left: 2px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 40px;
+            margin-bottom: 6px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
+            width: 100%;
         }
+        .category-title.早班 { background: #fef0c0; color: #8a6e2c; }
+        .category-title.小夜 { background: #cce5ff; color: #004080; }
+        .category-title.大夜 { background: #4a5b66; color: white; }
+        .category-title.休假 { background: #d4f1d4; color: #2c5a2c; }   /* 淺綠色 */
         .shift-time {
             font-size: 0.7rem;
             font-weight: normal;
-            color: #5f7f9e;
-            background: #ecf3f9;
-            padding: 2px 8px;
-            border-radius: 30px;
+            margin-left: 8px;
+        }
+        /* 大夜的時間文字顏色改為白色 */
+        .category-title.大夜 .shift-time {
+            color: white;
+        }
+        /* 其他班型的時間文字維持原色 */
+        .category-title.早班 .shift-time {
+            color: #8a6e2c;
+        }
+        .category-title.小夜 .shift-time {
+            color: #004080;
+        }
+        .category-title.休假 .shift-time {
+            color: #2c5a2c;
         }
         .group-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-left: 2px;
+            gap: 10px;
+            margin-top: 4px;
         }
         .group-tag {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: #f8fafd;
-            padding: 4px 10px;
-            border-radius: 48px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .group-tag .group-name {
-            font-weight: 800;
             font-size: 1rem;
-            color: #1f5e8e;
+            font-weight: 700;
+            background: #f8fafd;
+            padding: 4px 12px;
+            border-radius: 32px;
         }
-        .group-tag .shift-label {
-            padding: 2px 8px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
+        .group-tag .ml-letter {
+            font-weight: 700;
+            color: #2c3e50;
         }
+        .group-tag .ml-number {
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        /* 組別數字顏色 */
+        .ml-number.ml1 { color: #e74c3c; }  /* 紅色 */
+        .ml-number.ml2 { color: #f1c40f; text-shadow: 0 0 1px rgba(0,0,0,0.2); }  /* 黃色 */
+        .ml-number.ml3 { color: #3498db; }  /* 藍色 */
+        .ml-number.ml4 { color: #2ecc71; }  /* 綠色 */
         footer {
             margin-top: 20px;
             text-align: center;
@@ -303,12 +319,10 @@
         }
         @media (max-width: 750px) {
             .container { padding: 12px; }
-            .group-tag { padding: 3px 8px; gap: 5px; }
-            .group-tag .group-name { font-size: 0.85rem; }
-            .category-title { font-size: 0.7rem; }
-            .shift-time { font-size: 0.6rem; }
+            .group-tag { font-size: 0.85rem; padding: 3px 10px; }
+            .group-tag .ml-number { font-size: 1rem; }
+            .category-title { font-size: 0.7rem; padding: 4px 8px; }
             .date-number { font-size: 0.85rem; }
-            .current-month { font-size: 1rem; }
             .capture-title { font-size: 1.1rem; }
         }
     </style>
@@ -344,7 +358,7 @@
         <div class="legend-item" style="margin-left:auto;">🔁 排序：早班 → 小夜 → 大夜 → 休假</div>
     </div>
 
-    <!-- 截圖目標區塊，內含月份標題 + 月曆表格 -->
+    <!-- 截圖目標區塊 -->
     <div class="calendar-wrapper" id="captureArea">
         <div id="captureTitle" class="capture-title">2026年4月 桃園維護組輪班表</div>
         <table class="calendar-table" id="calendarTable">
@@ -400,13 +414,23 @@
         return [...days.slice(1), days[0]];
     }
 
-    // 更新截圖標題
     function updateCaptureTitle(year, month) {
         const titleDiv = document.getElementById('captureTitle');
         if (titleDiv) {
             const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
             titleDiv.innerText = `${year}年 ${monthNames[month]} 桃園維護組輪班表`;
         }
+    }
+
+    // 產生帶顏色數字的組別標籤
+    function formatGroupTag(groupName) {
+        const number = groupName.slice(2); // "ML1" -> "1"
+        let colorClass = '';
+        if (number === '1') colorClass = 'ml1';
+        else if (number === '2') colorClass = 'ml2';
+        else if (number === '3') colorClass = 'ml3';
+        else if (number === '4') colorClass = 'ml4';
+        return `<span class="group-tag"><span class="ml-letter">ML</span><span class="ml-number ${colorClass}">${number}</span></span>`;
     }
 
     function renderCalendar(year, month, highlightSelectedDate = null, startWeek = weekStart) {
@@ -455,21 +479,38 @@
             }
             const weekStr = headers[weekCol];
             const dateHeader = `<div class="date-header"><span class="date-number">${dateCounter}</span><span style="font-size:0.7rem; color:#7f9cbb;">${weekStr}</span></div>`;
+            
+            // 收集當日各組班型
             const groupShifts = {};
             for (let g of GROUPS) {
                 const shift = getShiftByDate(g, currentDate);
                 if (!groupShifts[shift]) groupShifts[shift] = [];
                 groupShifts[shift].push(g);
             }
+            
             let groupsHtml = '<div class="shift-group-list">';
             for (let shiftType of SHIFT_ORDER) {
                 const groupsWithShift = groupShifts[shiftType];
                 if (!groupsWithShift || groupsWithShift.length === 0) continue;
                 groupsWithShift.sort((a,b) => GROUPS.indexOf(a) - GROUPS.indexOf(b));
-                const shiftClass = (shiftType === "早班" ? "早班" : (shiftType === "小夜" ? "小夜" : (shiftType === "大夜" ? "大夜" : "休假")));
                 const timeLabel = SHIFT_TIMES[shiftType];
                 const timeHtml = (shiftType !== "休假" && timeLabel) ? `<span class="shift-time">${timeLabel}</span>` : '';
-                groupsHtml += `<div class="shift-category"><div class="category-title"><span>${shiftType}</span>${timeHtml}</div><div class="group-tags">${groupsWithShift.map(g => `<span class="group-tag"><span class="group-name">${g}</span><span class="shift-label shift-badge ${shiftClass}">${shiftType}</span></span>`).join('')}</div></div>`;
+                let titleClass = '';
+                if (shiftType === '早班') titleClass = '早班';
+                else if (shiftType === '小夜') titleClass = '小夜';
+                else if (shiftType === '大夜') titleClass = '大夜';
+                else titleClass = '休假';
+                groupsHtml += `
+                    <div class="shift-category">
+                        <div class="category-title ${titleClass}">
+                            <span>${shiftType}</span>
+                            ${timeHtml}
+                        </div>
+                        <div class="group-tags">
+                            ${groupsWithShift.map(g => formatGroupTag(g)).join('')}
+                        </div>
+                    </div>
+                `;
             }
             groupsHtml += '</div>';
             cell.innerHTML = dateHeader + groupsHtml;
@@ -629,4 +670,4 @@
     init();
 </script>
 </body>
-</html>
+    </html>
