@@ -236,13 +236,15 @@
             height: 140px;
             overflow-y: auto;
         }
+        /* 今天的紅色框線 */
         .calendar-table td.today-cell {
             border: 3px solid #e34234 !important;
             background-color: #fff0e8;
         }
+        /* 選定日期僅保留淺色背景，無紅色框線 */
         .calendar-table td.selected-cell {
-            border: 3px solid #e34234 !important;
-            background-color: #fff0e8;
+            background-color: #fffaf0;
+            border: 2px solid #333333;  /* 維持黑色粗框，無紅色 */
         }
         .date-header {
             display: flex;
@@ -413,7 +415,7 @@
             <tbody id="calendarBody"></tbody>
         </table>
     </div>
-    <footer>✅ 基準日期：2026-04-01 · 年份範圍 1950~2150 · 紅框為今日 · 選定日期同樣為紅框<br>📌 可切換「週日/週一」為每週第一天，下載圖片會自動帶入年月標題。</footer>
+    <footer>✅ 基準日期：2026-04-01 · 年份範圍 1950~2150 · 紅框為今日 · 選定日期僅淺色背景<br>📌 可切換「週日/週一」為每週第一天，下載圖片會自動帶入年月標題。</footer>
 </div>
 
 <script>
@@ -520,7 +522,7 @@
         const thead = document.getElementById("tableHeader");
         tbody.innerHTML = "";
         const headers = getWeekdayHeaders(startWeek);
-        thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</td>`;
+        thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
         
         let dateCounter = 1;
         let currentRow = null;
@@ -784,7 +786,7 @@
         
         // 深拷貝整個 captureArea
         const cloneArea = captureElement.cloneNode(true);
-        // 確保克隆中的標題文字正確（使用 class 而非 id）
+        // 確保克隆中的標題文字正確
         const cloneTitle = cloneArea.querySelector('.capture-title');
         if (cloneTitle) cloneTitle.innerText = `${currentYear}年 ${monthNames[currentMonth]} 航線修護本部輪班表`;
         
