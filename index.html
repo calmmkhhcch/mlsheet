@@ -54,8 +54,11 @@
             color: #5a3e1b;
             white-space: nowrap;
         }
-        .btn-download {
-            background: #2c6e2c;
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-download, .btn-wallpaper {
             border: none;
             color: white;
             font-size: 0.9rem;
@@ -70,8 +73,18 @@
             transition: 0.2s;
             flex-shrink: 0;
         }
+        .btn-download {
+            background: #2c6e2c;
+        }
         .btn-download:hover {
             background: #1e551e;
+            transform: scale(0.97);
+        }
+        .btn-wallpaper {
+            background: #4361ee;
+        }
+        .btn-wallpaper:hover {
+            background: #2c4ad0;
             transform: scale(0.97);
         }
         .controls {
@@ -215,14 +228,13 @@
             text-align: center;
             font-size: 0.85rem;
         }
-        /* 固定每個日期格子的高度，內容過多可滾動 */
         .calendar-table td {
             border: 2px solid #333333;
             padding: 8px 6px;
             vertical-align: top;
             background-color: #fef7e6;
-            height: 140px;          /* 固定高度 */
-            overflow-y: auto;       /* 內容過多時滾動，保持格子大小一致 */
+            height: 140px;
+            overflow-y: auto;
         }
         .calendar-table td.today-cell {
             border: 3px solid #e34234 !important;
@@ -348,7 +360,7 @@
             .header-area { flex-wrap: wrap; }
             h1 { font-size: 1.2rem; white-space: normal; }
             h1 small { font-size: 0.7rem; }
-            .btn-download { padding: 6px 12px; font-size: 0.75rem; }
+            .btn-download, .btn-wallpaper { padding: 6px 12px; font-size: 0.75rem; }
             .calendar-table td { height: 150px; padding: 6px 4px; }
             .group-tag { font-size: 0.8rem; padding: 2px 6px; }
             .group-tag .ml-number { font-size: 0.9rem; }
@@ -363,7 +375,10 @@
 <div class="container" id="calendarContainer">
     <div class="header-area">
         <h1 id="mainTitle">航線修護本部 萬年輪班月曆</h1>
-        <button class="btn-download" id="downloadBtn">📸 下載本月圖片</button>
+        <div class="btn-group">
+            <button class="btn-download" id="downloadBtn">📸 下載本月圖片</button>
+            <button class="btn-wallpaper" id="wallpaperBtn">📱 下載手機桌布</button>
+        </div>
     </div>
     <div class="controls">
         <div class="date-picker-area">
@@ -415,6 +430,7 @@
     const SHIFT_ORDER = ["早班", "小夜", "大夜", "休假"];
     const SHIFT_TIMES = { "早班": "06:00-14:00", "小夜": "14:30-22:30", "大夜": "22:30-06:30", "休假": "R,Z" };
 
+    // 台灣節日資料
     function getHolidayName(month, day, year) {
         const key = `${month+1}/${day}`;
         const fixedHolidays = {
@@ -515,14 +531,30 @@
                 currentRow = document.createElement("tr");
                 tbody.appendChild(currentRow);
             }
-            if (i < offset || dateCounter > daysInMonth) {
+            
+            const isAfterMonthEnd = (dateCounter > daysInMonth);
+            const isBeforeMonthStart = (i < offset && dateCounter === 1);
+            
+            if (isBeforeMonthStart) {
                 const emptyCell = document.createElement("td");
                 emptyCell.style.backgroundColor = "#fef7e6";
                 emptyCell.style.padding = "10px 6px";
+                emptyCell.style.border = "2px solid #333333";
                 emptyCell.innerHTML = "&nbsp;";
                 currentRow.appendChild(emptyCell);
                 continue;
             }
+            
+            if (isAfterMonthEnd) {
+                const emptyCell = document.createElement("td");
+                emptyCell.style.backgroundColor = "#fef7e6";
+                emptyCell.style.padding = "10px 6px";
+                emptyCell.style.border = "none";
+                emptyCell.innerHTML = "&nbsp;";
+                currentRow.appendChild(emptyCell);
+                continue;
+            }
+            
             const currentDate = new Date(year, month, dateCounter);
             const weekDay = currentDate.getDay();
             const isWeekend = (startWeek === 0 && (weekDay === 0 || weekDay === 6)) || (startWeek === 1 && (weekDay === 6 || weekDay === 0));
@@ -530,6 +562,7 @@
             cell.style.verticalAlign = "top";
             cell.style.padding = "8px 6px";
             cell.style.backgroundColor = isWeekend ? "#fef7e6" : "#fef7e6";
+            cell.style.border = "2px solid #333333";
             
             const isToday = (currentDate.getTime() === today.getTime());
             const isSelected = (highlightSelectedDate && currentDate.getTime() === highlightSelectedDate.getTime());
@@ -578,7 +611,7 @@
                 } else if (shiftType === '大夜') {
                     titleClass = '大夜';
                     timeHtml = `<span class="shift-time">${timeLabel}</span>`;
-                } else { // 休假
+                } else {
                     titleClass = '休假';
                     timeHtml = `<span class="shift-time-rz">${timeLabel}</span>`;
                 }
@@ -713,6 +746,7 @@
         captureElement.style.width = 'max-content';
         const table = captureElement.querySelector('table');
         if (table) table.style.width = 'max-content';
+        await new Promise(r => setTimeout(r, 30));
         try {
             const canvas = await html2canvas(captureElement, {
                 scale: 2.8,
@@ -738,6 +772,85 @@
         }
     }
 
+    // ======================= 手機桌布功能（完整複製標題並調整大小）=======================
+    async function generateMobileWallpaper() {
+        // 更新原始標題為當前年月
+        const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+        const originalTitle = document.getElementById('captureTitle');
+        if (originalTitle) originalTitle.innerText = `${currentYear}年 ${monthNames[currentMonth]} 航線修護本部輪班表`;
+        
+        const captureElement = document.getElementById('captureArea');
+        if (!captureElement) return;
+        
+        // 深拷貝整個 captureArea
+        const cloneArea = captureElement.cloneNode(true);
+        // 確保克隆中的標題文字正確（使用 class 而非 id）
+        const cloneTitle = cloneArea.querySelector('.capture-title');
+        if (cloneTitle) cloneTitle.innerText = `${currentYear}年 ${monthNames[currentMonth]} 航線修護本部輪班表`;
+        
+        // 設定克隆樣式
+        cloneArea.style.position = 'absolute';
+        cloneArea.style.top = '-9999px';
+        cloneArea.style.left = '-9999px';
+        cloneArea.style.width = 'auto';
+        cloneArea.style.overflow = 'visible';
+        cloneArea.style.backgroundColor = '#fef7e6';
+        cloneArea.style.boxShadow = 'none';
+        cloneArea.style.border = 'none';
+        // 確保內部表格寬度正確
+        const cloneTable = cloneArea.querySelector('table');
+        if (cloneTable) cloneTable.style.width = 'max-content';
+        document.body.appendChild(cloneArea);
+        
+        // 強制重繪
+        void cloneArea.offsetHeight;
+        await new Promise(r => setTimeout(r, 80));
+        
+        try {
+            const canvas = await html2canvas(cloneArea, {
+                scale: 3,
+                backgroundColor: '#fef7e6',
+                logging: false,
+                useCORS: false,
+                allowTaint: false,
+                windowWidth: cloneArea.scrollWidth,
+                windowHeight: cloneArea.scrollHeight
+            });
+            
+            // 建立手機桌布畫布 1080x1920
+            const wallpaperCanvas = document.createElement('canvas');
+            wallpaperCanvas.width = 1080;
+            wallpaperCanvas.height = 1920;
+            const ctx = wallpaperCanvas.getContext('2d');
+            ctx.fillStyle = '#fef7e6';
+            ctx.fillRect(0, 0, wallpaperCanvas.width, wallpaperCanvas.height);
+            
+            // 將月曆區域縮小為畫布寬度的 70%（類似參考圖片，留白更多）
+            const targetWidth = wallpaperCanvas.width * 0.70;
+            const scale = targetWidth / canvas.width;
+            const targetHeight = canvas.height * scale;
+            const x = (wallpaperCanvas.width - targetWidth) / 2;
+            const y = (wallpaperCanvas.height - targetHeight) / 2;
+            ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, x, y, targetWidth, targetHeight);
+            
+            wallpaperCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `桌布_${currentYear}年${monthNames[currentMonth]}.png`;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        } catch (err) {
+            console.error('桌布生成失敗:', err);
+            alert('產生手機桌布失敗，請稍後重試。');
+        } finally {
+            document.body.removeChild(cloneArea);
+        }
+    }
+    
+    document.getElementById('wallpaperBtn').addEventListener('click', generateMobileWallpaper);
+    
     function init() {
         let initYear = today.getFullYear(), initMonth = today.getMonth();
         currentYear = initYear;
